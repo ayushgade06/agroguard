@@ -23,8 +23,13 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await registerUser(name.trim(), email.trim(), password);
-      navigate("/login");
+      const data = await registerUser(name.trim(), email.trim(), password);
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      console.log(data);
+
+      navigate("/dashboard");
     } catch (err) {
       setError(err.message || "Registration failed");
     } finally {

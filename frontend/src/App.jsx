@@ -2,12 +2,8 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
-
-const Dashboard = () => (
-  <div className="h-screen flex items-center justify-center">
-    <h1 className="text-3xl font-bold">Welcome to AgroGuard 🌱</h1>
-  </div>
-);
+import Dashboard from "./pages/Dashboard";
+import AnalyzeCrop from "./pages/AnalyzeCrop";
 
 function App() {
   return (
@@ -20,11 +16,15 @@ function App() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <Dashboard/>
           </ProtectedRoute>
         }
       />
+
+      <Route path="/analyze" element={<AnalyzeCrop />} />
+
     </Routes>
+
   );
 }
 
