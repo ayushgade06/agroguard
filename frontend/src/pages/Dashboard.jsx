@@ -1,177 +1,143 @@
-import React from "react";
-import { Bell, ShieldAlert, Leaf, History, Camera } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 
-const Dashboard = (props) => {
-  const navigate = useNavigate();
+import Header from "../components/dashboard/Header";
+import HomeView from "../components/dashboard/HomeView";
+import ScanView from "../components/dashboard/ScanView";
+import ResultView from "../components/dashboard/ResultView";
+import HistoryView from "../components/dashboard/HistoryView";
+import LogoutButton from "../components/layout/LogoutButton";
+import { analyzeCropImage } from "../services/diagnosisService";
+import SidebarButton from "../components/layout/SidebarButton";
 
-  // const user = JSON.parse(localStorage.getItem("user"));  
-  // const userName = user?.name || "Farmer";
+export default function Dashboard() {
+  const [view, setView] = useState("home");
+  const [history, setHistory] = useState([]);
+  const [currentImage, setCurrentImage] = useState(null);
+  const [result, setResult] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const summary = {
-    riskLevel: "Medium",
-    weather: {
-      temp: "29°C",
-      humidity: "78%",
-      rain: "Light",
-    },
-    alertsCount: 1,
+  useEffect(() => {
+    const saved = localStorage.getItem("agri_history");
+    if (saved) setHistory(JSON.parse(saved));
+  }, []);
+
+  const handleFileChange = (file) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setCurrentImage(reader.result);
+      setView("scan");
+    };
+    reader.readAsDataURL(file);
   };
 
-  const alerts = [
-    {
-      crop: "Cotton",
-      issue: "Bollworm",
-      risk: "High",
-      reason: "High humidity and temperature pattern",
-    },
-  ];
+  const startAnalysis = async () => {
+    if (!currentImage) return;
+    setIsAnalyzing(true);
 
-  const preventions = [
-    "Spray neem oil in early morning",
-    "Avoid excess irrigation today",
-    "Monitor leaves for early signs",
-  ];
+    try {
+      const diagnosis = await analyzeCropImage(currentImage);
+      setResult(diagnosis);
 
-  const advisories = [
-    "High humidity favors fungal diseases",
-    "Early prevention reduces crop loss",
-    "Regular field monitoring is recommended",
-  ];
+      const newItem = {
+        id: Date.now().toString(),
+        date: new Date().toLocaleDateString(),
+        image: currentImage,
+        diagnosis,
+      };
+
+      const updated = [newItem, ...history];
+      setHistory(updated);
+      localStorage.setItem("agri_history", JSON.stringify(updated));
+
+      setView("result");
+    } catch {
+      alert("Analysis failed");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const deleteHistoryItem = (id) => {
+    const updated = history.filter((item) => item.id !== id);
+    setHistory(updated);
+    localStorage.setItem("agri_history", JSON.stringify(updated));
+  };
+
 
   return (
-    <div className="min-h-screen bg-[#fffbef] p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-800">
-            Welcome back, Farmer
-          </h1>
-          <p className="text-slate-500">
-            Crop health overview for today
-          </p>
+    <div className="min-h-screen bg-slate-50 flex">
+      <aside className="w-64 bg-white border-r border-slate-200 p-6">
+        <h1 className="text-2xl font-black text-emerald-700 mb-10">
+          AGRIGUARD
+        </h1>
+
+        <nav className="space-y-2">
+          <SidebarButton
+            label="Home"
+            active={view === "home"}
+            onClick={() => setView("home")}
+          />
+          <SidebarButton
+            label="Scan Crop"
+            active={view === "scan"}
+            onClick={() => document.getElementById("scan-input").click()}
+          />
+          <SidebarButton
+            label="History"
+            active={view === "history"}
+            onClick={() => setView("history")}
+          />
+        </nav>
+
+        <div className="mt-106 border-t border-slate-200">
+          <LogoutButton />
         </div>
 
-        <button className="relative p-2 rounded-full bg-white border border-slate-200">
-          <Bell className="text-slate-600" />
-          {summary.alertsCount > 0 && (
-            <span className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"></span>
+        <input
+          id="scan-input"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => handleFileChange(e.target.files[0])}
+        />
+      </aside>
+
+      <main className="flex-1 flex flex-col">
+        <Header />
+
+        <div className="flex-1 p-10 overflow-y-auto">
+          {view === "home" && <HomeView onSelectImage={handleFileChange} />}
+
+          {view === "scan" && (
+            <ScanView
+              image={currentImage}
+              onBack={() => setView("home")}
+              onAnalyze={startAnalysis}
+              isAnalyzing={isAnalyzing}
+            />
           )}
-        </button>
-      </div>
 
-      {/* Analyze CTA */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-800">
-            Analyze your crop using AI
-          </h2>
-          <p className="text-slate-500 text-sm">
-            Upload crop images to detect pests or diseases
-          </p>
+          {view === "result" && (
+            <ResultView
+              result={result}
+              onDone={() => setView("home")}
+            />
+          )}
+
+          {view === "history" && (
+            <HistoryView
+              history={history}
+              onSelect={(item) => {
+                setResult(item.diagnosis);
+                setCurrentImage(item.image);
+                setView("result");
+              }}
+              onBack={() => setView("home")}
+              onDelete={deleteHistoryItem}
+            />
+          )}
         </div>
-
-        <button
-          onClick={() => navigate("/analyze")}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition"
-        >
-          <Camera size={18} />
-          Analyze Crop
-        </button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-        <div className="bg-white border border-slate-200 p-5 rounded-xl">
-          <p className="text-sm text-slate-500">Overall Risk</p>
-          <h2 className="text-2xl font-semibold text-orange-600">
-            {summary.riskLevel}
-          </h2>
-        </div>
-
-        <div className="bg-white border border-slate-200 p-5 rounded-xl">
-          <p className="text-sm text-slate-500">Weather</p>
-          <p className="font-medium text-slate-700">
-            🌡 {summary.weather.temp} | 💧 {summary.weather.humidity}
-          </p>
-          <p className="text-sm text-slate-500">
-            🌧 {summary.weather.rain}
-          </p>
-        </div>
-
-        <div className="bg-white border border-slate-200 p-5 rounded-xl">
-          <p className="text-sm text-slate-500">Active Alerts</p>
-          <h2 className="text-2xl font-semibold text-red-600">
-            {summary.alertsCount}
-          </h2>
-        </div>
-      </div>
-
-      {/* Risk Alerts */}
-      <div className="bg-white border border-slate-200 p-6 rounded-xl mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <ShieldAlert className="text-orange-500" />
-          <h2 className="text-lg font-semibold text-slate-800">
-            Risk Alerts
-          </h2>
-        </div>
-
-        {alerts.map((alert, index) => (
-          <div
-            key={index}
-            className="border border-orange-200 bg-orange-50 rounded-lg p-4 mb-3"
-          >
-            <p className="font-medium text-slate-800">
-              ⚠️ {alert.issue} risk for {alert.crop}
-            </p>
-
-            <p className="text-sm text-slate-600 mt-1">
-              Risk Level:{" "}
-              <span className="font-semibold text-orange-700">
-                {alert.risk}
-              </span>
-            </p>
-
-            <p className="text-sm text-slate-500 mt-1">
-              {alert.reason}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Preventive Measures */}
-      <div className="bg-white border border-slate-200 p-6 rounded-xl mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Leaf className="text-green-600" />
-          <h2 className="text-lg font-semibold text-slate-800">
-            Preventive Suggestions
-          </h2>
-        </div>
-
-        <ul className="list-disc list-inside space-y-1 text-slate-700">
-          {preventions.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Advisories */}
-      <div className="bg-white border border-slate-200 p-6 rounded-xl">
-        <div className="flex items-center gap-2 mb-4">
-          <History className="text-slate-600" />
-          <h2 className="text-lg font-semibold text-slate-800">
-            Advisories
-          </h2>
-        </div>
-
-        <ul className="space-y-2 text-slate-700">
-          {advisories.map((tip, index) => (
-            <li key={index}>🌾 {tip}</li>
-          ))}
-        </ul>
-      </div>
+      </main>
     </div>
   );
-};
-
-export default Dashboard;
+}

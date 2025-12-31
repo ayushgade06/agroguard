@@ -21,7 +21,7 @@ function App() {
         }
       />
 
-      <Route path="/analyze" element={<AnalyzeCrop />} />
+      {/* <Route path="/analyze" element={<AnalyzeCrop />} /> */}
 
     </Routes>
 
