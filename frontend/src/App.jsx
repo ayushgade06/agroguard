@@ -3,7 +3,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
-import AnalyzeCrop from "./pages/AnalyzeCrop";
+// import AnalyzeCrop from "./pages/AnalyzeCrop";
 
 function App() {
   return (
@@ -21,8 +21,7 @@ function App() {
         }
       />
 
-      {/* <Route path="/analyze" element={<AnalyzeCrop />} /> */}
-
+        {/* <Route path="/analyze-crop" element={<AnalyzeCrop />} /> */}
     </Routes>
 
   );

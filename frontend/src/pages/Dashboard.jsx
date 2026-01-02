@@ -16,9 +16,55 @@ export default function Dashboard() {
   const [result, setResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  const [location, setLocation] = useState({
+    city: "",
+    state: "",
+    country: "",
+    error: null,
+  });
+
   useEffect(() => {
     const saved = localStorage.getItem("agri_history");
     if (saved) setHistory(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocation((prev) => ({ ...prev, error: "Geolocation not supported" }));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await res.json();
+
+          setLocation({
+            city:
+              data.address.city ||
+              data.address.town ||
+              data.address.village ||
+              "",
+            state: data.address.state || "",
+            country: data.address.country || "",
+            error: null,
+          });
+        } catch {
+          setLocation((prev) => ({ ...prev, error: "Failed to fetch location" }));
+        }
+      },
+      () => {
+        setLocation((prev) => ({
+          ...prev,
+          error: "Location permission denied",
+        }));
+      }
+    );
   }, []);
 
   const handleFileChange = (file) => {
@@ -43,6 +89,7 @@ export default function Dashboard() {
         date: new Date().toLocaleDateString(),
         image: currentImage,
         diagnosis,
+        location,
       };
 
       const updated = [newItem, ...history];
@@ -63,6 +110,7 @@ export default function Dashboard() {
     localStorage.setItem("agri_history", JSON.stringify(updated));
   };
 
+  const lastScan = history[0];
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -103,10 +151,68 @@ export default function Dashboard() {
       </aside>
 
       <main className="flex-1 flex flex-col">
-        <Header />
+        <Header location={location} />
 
         <div className="flex-1 p-10 overflow-y-auto">
-          {view === "home" && <HomeView onSelectImage={handleFileChange} />}
+          {view === "home" && (
+            <>
+              {/* Status Cards */}
+              <div className="grid grid-cols-3 gap-6 mb-10">
+                <div className="bg-white p-5 rounded-xl border">
+                  <p className="text-sm text-slate-500">Last Scan</p>
+                  <p className="text-xl font-bold text-emerald-700">
+                    {lastScan?.diagnosis?.disease || "—"}
+                  </p>
+                </div>
+
+                <div className="bg-white p-5 rounded-xl border">
+                  <p className="text-sm text-slate-500">Risk Level</p>
+                  <p className="text-xl font-bold text-red-600">
+                    {lastScan?.diagnosis?.severity || "—"}
+                  </p>
+                </div>
+
+                <div className="bg-white p-5 rounded-xl border">
+                  <p className="text-sm text-slate-500">Last Scanned</p>
+                  <p className="text-xl font-semibold">
+                    {lastScan?.date || "—"}
+                  </p>
+                </div>
+              </div>
+
+              <HomeView onSelectImage={handleFileChange} />
+
+              {history.length > 0 && (
+                <div className="mt-12">
+                  <h3 className="text-lg font-semibold mb-4">
+                    Recent Scans
+                  </h3>
+
+                  <div className="space-y-3">
+                    {history.slice(0, 2).map((item) => (
+                      <div
+                        key={item.id}
+                        className="bg-white p-4 rounded-lg border flex justify-between"
+                      >
+                        <div>
+                          <p className="font-semibold">
+                            {item.diagnosis.disease}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            {item.location?.city}, {item.location?.state}
+                          </p>
+                        </div>
+
+                        <span className="text-sm font-medium text-red-600">
+                          {item.diagnosis.severity}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
           {view === "scan" && (
             <ScanView
@@ -118,10 +224,7 @@ export default function Dashboard() {
           )}
 
           {view === "result" && (
-            <ResultView
-              result={result}
-              onDone={() => setView("home")}
-            />
+            <ResultView result={result} onDone={() => setView("home")} />
           )}
 
           {view === "history" && (
