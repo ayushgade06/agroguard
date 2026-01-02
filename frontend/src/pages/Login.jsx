@@ -47,7 +47,7 @@ const Login = () => {
             AgriGuard
           </h1>
           <p className="text-slate-500 mt-2">
-            Smart crop disease detection
+            Smart crop pest & disease detection
           </p>
         </div>
 
@@ -81,7 +81,6 @@ const Login = () => {
               focus:outline-none focus:ring-2 focus:ring-emerald-200"
           />
 
-          {/* Animated Button */}
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

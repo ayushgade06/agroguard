@@ -1,6 +1,6 @@
 export async function analyzeCropImage(base64Image) {
   // Simulate network delay (feels real)
-  await new Promise((res) => setTimeout(res, 1200));
+  await new Promise((res) => setTimeout(res, 2000));
 
   // You can randomize later if you want
   return {
