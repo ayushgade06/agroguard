@@ -2,6 +2,13 @@ export default function HomeView({ onSelectImage, history = [] }) {
   const safeHistory = Array.isArray(history) ? history : [];
   const recent = safeHistory[0];
 
+  function formatDateOnly(dateString) {
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      dateStyle: "medium",
+    });
+  }
+
   return (
     <div className="space-y-8">
       <header>
@@ -12,7 +19,6 @@ export default function HomeView({ onSelectImage, history = [] }) {
           Upload a crop image to detect pests or diseases.
         </p>
       </header>
-
 
       <div className="grid grid-cols-3 gap-6">
         <div className="bg-white border rounded-xl p-5">
@@ -32,16 +38,14 @@ export default function HomeView({ onSelectImage, history = [] }) {
         <div className="bg-white border rounded-xl p-5">
           <p className="text-sm text-slate-500">Last Scan</p>
           <p className="text-sm font-semibold">
-            {recent
-              ? new Date(recent.created_at).toLocaleString()
+            {recent?.created_at
+              ? formatDateOnly(recent.created_at)
               : "—"}
           </p>
         </div>
       </div>
 
-
       <div className="grid grid-cols-3 gap-6">
-
         <div className="col-span-2 bg-white border rounded-xl p-6">
           <label>
             <input
@@ -61,7 +65,6 @@ export default function HomeView({ onSelectImage, history = [] }) {
           </label>
         </div>
 
-
         <div className="bg-white border rounded-xl p-6">
           <h3 className="font-bold mb-4">Quick Tips</h3>
           <ul className="text-slate-600 space-y-2 text-sm">
@@ -71,7 +74,6 @@ export default function HomeView({ onSelectImage, history = [] }) {
           </ul>
         </div>
       </div>
-
 
       <div>
         <h3 className="font-bold mb-3">Recent Scans</h3>
@@ -90,7 +92,9 @@ export default function HomeView({ onSelectImage, history = [] }) {
                 <div>
                   <p className="font-semibold">{item.disease}</p>
                   <p className="text-sm text-slate-500">
-                    {new Date(item.created_at).toLocaleString()}
+                    {item.created_at
+                      ? formatDateOnly(item.created_at)
+                      : "—"}
                   </p>
                 </div>
 

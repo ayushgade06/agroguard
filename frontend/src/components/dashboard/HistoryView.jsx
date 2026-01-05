@@ -53,9 +53,14 @@ export default function HistoryView({
 
                   <p className="text-sm text-slate-500 mt-1">
                     {item.created_at
-                      ? new Date(item.created_at).toLocaleString()
+                      ? new Date(item.created_at).toLocaleDateString("en-IN", {
+                          timeZone: "Asia/Kolkata",
+                          dateStyle: "medium",
+                        })
                       : "—"}
                   </p>
+
+
                 </div>
 
                 {/* RIGHT: DELETE BUTTON (ALWAYS VISIBLE) */}

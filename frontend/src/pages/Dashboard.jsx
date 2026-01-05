@@ -32,7 +32,6 @@ export default function Dashboard() {
     error: null,
   });
 
-  /* ================= LOCATION ================= */
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -85,13 +84,18 @@ export default function Dashboard() {
     );
   }, []);
 
-  /* ================= LOAD HISTORY ON MOUNT ================= */
 
   useEffect(() => {
-    loadHistory();
-  }, []);
+    const token = localStorage.getItem("token");
 
-  /* ================= IMAGE PICK ================= */
+    if (!token) {
+      setHistory([]);
+      return;
+    }
+
+    loadHistory();
+  }, [localStorage.getItem("token")]);
+
 
   const handleFileChange = (file) => {
     if (!file) return;
@@ -108,7 +112,6 @@ export default function Dashboard() {
     setView("scan");
   };
 
-  /* ================= ANALYSIS ================= */
 
   const startAnalysis = async () => {
     if (!currentImage?.file) return;
@@ -136,8 +139,7 @@ export default function Dashboard() {
         err.message?.includes("session") ||
         err.message?.includes("login")
       ) {
-        alert(err.message);
-        localStorage.removeItem("token");
+        localStorage.clear();
         window.location.href = "/login";
         return;
       }
@@ -148,7 +150,6 @@ export default function Dashboard() {
     }
   };
 
-  /* ================= HISTORY ================= */
 
   async function loadHistory() {
     setHistoryLoading(true);
@@ -176,7 +177,6 @@ export default function Dashboard() {
   const locationReady =
     location.latitude && location.longitude && !location.error;
 
-  /* ================= UI ================= */
 
   return (
     <div className="min-h-screen bg-slate-50 flex">

@@ -3,7 +3,7 @@ const API = "http://127.0.0.1:8000";
 export async function fetchNotifications() {
   try {
     const token = localStorage.getItem("token");
-    
+
     if (!token) {
       console.warn("No token found, skipping notifications fetch");
       return [];
@@ -31,7 +31,6 @@ export async function fetchNotifications() {
 export async function markNotificationRead(id) {
   try {
     const token = localStorage.getItem("token");
-    
     if (!token) return;
 
     await fetch(`${API}/notifications/${id}/read`, {
