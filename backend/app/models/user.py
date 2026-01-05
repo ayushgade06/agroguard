@@ -8,15 +8,17 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+
+    # Basic user info
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
 
-
+    # Location (used for 5km notification radius)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
 
-
+    # Relationships
     detections = relationship(
         "Detection",
         back_populates="user",

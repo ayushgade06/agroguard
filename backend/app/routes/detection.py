@@ -12,6 +12,8 @@ from app.ml.inference import predict
 
 router = APIRouter(prefix="/detections", tags=["Detections"])
 
+RADIUS_KM = 5
+
 
 @router.post("/")
 async def detect_disease(
@@ -25,14 +27,13 @@ async def detect_disease(
     1. Receives image + location
     2. Runs ML model
     3. Stores detection
-    4. Notifies users within 5km
+    4. Notifies users within 5km radius
     """
 
     # ---------------- VALIDATION ----------------
     if file.content_type not in ["image/jpeg", "image/png"]:
         raise HTTPException(status_code=400, detail="Invalid image format")
 
-    # ---------------- LOAD IMAGE ----------------
     try:
         image = Image.open(file.file).convert("RGB")
     except Exception:
@@ -40,8 +41,6 @@ async def detect_disease(
 
     # ---------------- ML INFERENCE ----------------
     result = predict(image)
-    # expected: { "class": str, "confidence": float }
-
     disease = result.get("class", "Unknown")
     confidence = float(result.get("confidence", 0.0))
 
@@ -63,8 +62,8 @@ async def detect_disease(
     db.commit()
     db.refresh(detection)
 
-    # ---------------- RADIUS ALERT (5 KM) ----------------
-    users = (
+    # ---------------- NOTIFY USERS WITHIN 5 KM ----------------
+    nearby_users = (
         db.query(User)
         .filter(
             User.id != current_user.id,
@@ -74,7 +73,7 @@ async def detect_disease(
         .all()
     )
 
-    for user in users:
+    for user in nearby_users:
         distance = haversine(
             latitude,
             longitude,
@@ -82,10 +81,11 @@ async def detect_disease(
             user.longitude,
         )
 
-        if distance <= 5:
+        if distance <= RADIUS_KM:
             notification = Notification(
                 user_id=user.id,
-                message=f"{disease} detected within 5km of your area",
+                title="⚠️ Disease Alert Nearby",
+                message=f"{disease} detected within 5 km of your area",
             )
             db.add(notification)
 
@@ -96,7 +96,7 @@ async def detect_disease(
         "disease": disease,
         "confidence": confidence,
         "severity": "High" if confidence > 0.8 else "Medium",
-        "explanation": f"The model detected {disease} with high confidence.",
+        "explanation": f"The model detected {disease} with {confidence:.2%} confidence.",
         "immediateActions": [
             "Isolate affected crops",
             "Avoid overhead irrigation",
@@ -104,9 +104,21 @@ async def detect_disease(
         ],
     }
 
+
 @router.delete("/{detection_id}")
-def delete_detection(detection_id: int, db: Session = Depends(get_db)):
-    detection = db.query(Detection).filter(Detection.id == detection_id).first()
+def delete_detection(
+    detection_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    detection = (
+        db.query(Detection)
+        .filter(
+            Detection.id == detection_id,
+            Detection.user_id == current_user.id,
+        )
+        .first()
+    )
 
     if not detection:
         raise HTTPException(status_code=404, detail="Detection not found")
