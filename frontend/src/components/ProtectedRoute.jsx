@@ -1,13 +1,20 @@
-import { Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
+export default function ProtectedRoute({ children }) {
+  const navigate = useNavigate();
 
-  if (!token) {
-    return <Navigate to="/login"/>;
-  }
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    
+    // Check if token exists and is valid format (JWT tokens are long)
+    if (!token || token === "undefined" || token === "null" || token.length < 50) {
+      console.warn("Invalid or missing token, redirecting to login");
+      localStorage.clear(); // Clear all auth data
+      navigate("/login", { replace: true });
+    }
+  }, [navigate]);
 
   return children;
-};
+}
 
-export default ProtectedRoute;

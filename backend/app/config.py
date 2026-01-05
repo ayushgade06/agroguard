@@ -5,12 +5,22 @@ from fastapi.security import HTTPBearer
 
 load_dotenv()
 
+# ---------------- JWT CONFIG ---------------- #
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(
+    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
+)
 
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY is not set in .env")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ---------------- SECURITY ---------------- #
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
 security = HTTPBearer()

@@ -1,26 +1,34 @@
-export async function analyzeCropImage(base64Image) {
-  // Simulate network delay (feels real)
-  await new Promise((res) => setTimeout(res, 2000));
+export async function analyzeCropImage(file, latitude, longitude) {
+  const token = localStorage.getItem("token");
 
-  // You can randomize later if you want
-  return {
-    disease: "Leaf Blight",
-    severity: "HIGH",
-    explanation:
-      "The leaf shows brown patches and dry edges, which usually indicate a fungal infection.",
-    immediateActions: [
-      "Remove heavily infected leaves",
-      "Avoid overhead watering",
-      "Spray recommended fungicide within 24 hours",
-    ],
-    organicTreatment:
-      "Spray neem oil mixed with water once every 5 days.",
-    chemicalTreatment:
-      "Use Mancozeb or Copper-based fungicide as per label instructions.",
-    preventionTips: [
-      "Maintain proper plant spacing",
-      "Avoid excess moisture on leaves",
-      "Inspect crops weekly",
-    ],
-  };
+  if (!token || token === "undefined" || token === "null") {
+    throw new Error("Please login again - your session has expired");
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("latitude", latitude);
+  formData.append("longitude", longitude);
+
+  const res = await fetch("http://127.0.0.1:8000/detections", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      // ❌ DO NOT set Content-Type for FormData
+    },
+    body: formData, // 🔥 THIS WAS MISSING
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      throw new Error("Session expired - please login again");
+    }
+
+    const err = await res.text();
+    console.error("Detection API error:", err);
+    throw new Error(err || "Detection failed");
+  }
+
+  return res.json();
 }

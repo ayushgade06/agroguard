@@ -1,61 +1,75 @@
-import RiskBadge from "./RiskBadge";
-import Button from "./Button";
 import { motion } from "framer-motion";
 
-export default function ResultView({ result }) {
+export default function ResultView({ result, onDone }) {
+  if (!result) return null;
+
+  const {
+    disease = "Unknown",
+    confidence = 0,
+    severity = "—",
+    explanation = "",
+    immediateActions = [],
+  } = result;
+
   return (
     <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={{
-        hidden: { opacity: 0 },
-        visible: {
-          opacity: 1,
-          transition: {
-            staggerChildren: 0.12,
-          },
-        },
-      }}
-      className="grid grid-cols-2 gap-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="max-w-3xl mx-auto"
     >
-      <motion.div
-        variants={{
-          hidden: { opacity: 0, y: 20 },
-          visible: { opacity: 1, y: 0 },
-        }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="bg-white border rounded-xl p-6"
-      >
-        <h2 className="text-2xl font-bold mb-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">
           Diagnosis Result
         </h2>
 
-        <p className="text-lg font-semibold text-red-700">
-          {result.disease}
+        <p className="text-red-600 font-semibold text-lg mb-4">
+          {disease}
         </p>
-        <p className="text-slate-600 mt-2">
-          {result.explanation}
-        </p>
-      </motion.div>
 
-      <motion.div
-        variants={{
-          hidden: { opacity: 0, y: 20 },
-          visible: { opacity: 1, y: 0 },
-        }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="bg-white border rounded-xl p-6"
-      >
-        <h3 className="font-bold mb-3">
-          Immediate Actions
-        </h3>
+        <div className="flex gap-6 mb-6">
+          <div>
+            <p className="text-sm text-slate-500">Confidence</p>
+            <p className="font-semibold">
+              {(confidence * 100).toFixed(1)}%
+            </p>
+          </div>
 
-        <ul className="list-disc list-inside space-y-2">
-          {result.immediateActions.map((a, i) => (
-            <li key={i}>{a}</li>
-          ))}
-        </ul>
-      </motion.div>
+          <div>
+            <p className="text-sm text-slate-500">Severity</p>
+            <p className="font-semibold">{severity}</p>
+          </div>
+        </div>
+
+        {explanation && (
+          <p className="text-slate-600 mb-6 leading-relaxed">
+            {explanation}
+          </p>
+        )}
+
+        {immediateActions.length > 0 && (
+          <div className="mb-6">
+            <h3 className="font-semibold mb-2">
+              Recommended Actions
+            </h3>
+            <ul className="list-disc list-inside space-y-1 text-slate-700">
+              {immediateActions.map((a, i) => (
+                <li key={i}>{a}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="flex justify-end">
+          <button
+            onClick={onDone}
+            className="px-6 py-2 rounded-lg bg-emerald-600
+                       text-white font-semibold hover:bg-emerald-700"
+          >
+            Done
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 }

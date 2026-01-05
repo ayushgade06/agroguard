@@ -1,5 +1,6 @@
 const API_BASE_URL = "http://127.0.0.1:8000";
 
+
 export async function loginUser(email, password) {
   const response = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
@@ -9,27 +10,37 @@ export async function loginUser(email, password) {
     body: JSON.stringify({ email, password }),
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Login failed");
+    const message =
+      Array.isArray(data.detail)
+        ? data.detail[0].msg
+        : data.detail || "Login failed";
+
+    throw new Error(message);
   }
 
-  return response.json();
+  return data;
 }
 
 export async function registerUser(name, email, password) {
-  const response = await fetch(`${API_BASE_URL}/signup`, {
+  const res = await fetch("http://127.0.0.1:8000/signup", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({
+      name,
+      email,
+      password,
+    }),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Registration failed");
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
   }
 
-  return response.json();
+  return res.json();
 }
