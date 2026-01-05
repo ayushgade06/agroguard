@@ -4,7 +4,6 @@ export default function HomeView({ onSelectImage, history = [] }) {
 
   return (
     <div className="space-y-8">
-      {/* HEADER */}
       <header>
         <h2 className="text-3xl font-bold text-slate-900">
           Crop Health Dashboard
@@ -14,7 +13,7 @@ export default function HomeView({ onSelectImage, history = [] }) {
         </p>
       </header>
 
-      {/* TOP SUMMARY */}
+
       <div className="grid grid-cols-3 gap-6">
         <div className="bg-white border rounded-xl p-5">
           <p className="text-sm text-slate-500">Last Disease</p>
@@ -40,9 +39,9 @@ export default function HomeView({ onSelectImage, history = [] }) {
         </div>
       </div>
 
-      {/* MAIN GRID */}
+
       <div className="grid grid-cols-3 gap-6">
-        {/* UPLOAD */}
+
         <div className="col-span-2 bg-white border rounded-xl p-6">
           <label>
             <input
@@ -62,7 +61,7 @@ export default function HomeView({ onSelectImage, history = [] }) {
           </label>
         </div>
 
-        {/* TIPS */}
+
         <div className="bg-white border rounded-xl p-6">
           <h3 className="font-bold mb-4">Quick Tips</h3>
           <ul className="text-slate-600 space-y-2 text-sm">
@@ -73,7 +72,7 @@ export default function HomeView({ onSelectImage, history = [] }) {
         </div>
       </div>
 
-      {/* RECENT SCANS */}
+
       <div>
         <h3 className="font-bold mb-3">Recent Scans</h3>
 

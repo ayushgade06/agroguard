@@ -1,7 +1,6 @@
 import { Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-/* Animations */
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {

@@ -12,11 +12,11 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
 
-    # auto-detected user location
+
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
 
-    # relationships
+
     detections = relationship(
         "Detection",
         back_populates="user",

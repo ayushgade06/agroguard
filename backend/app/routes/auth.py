@@ -58,16 +58,14 @@ def get_current_user(
         if not subject:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-        # Try to find user by email first (new token format)
         user = db.query(User).filter(User.email == subject).first()
         
-        # If not found, try by ID (old token format - backward compatibility)
         if not user:
             try:
                 user_id = int(subject)
                 user = db.query(User).filter(User.id == user_id).first()
             except ValueError:
-                pass  # subject is not a number, continue
+                pass
         
         if not user:
             raise HTTPException(status_code=401, detail="User not found")

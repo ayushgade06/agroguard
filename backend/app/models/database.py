@@ -12,8 +12,8 @@ if not DATABASE_URL:
 
 engine = create_engine(
     DATABASE_URL,
-    pool_pre_ping=True,   # prevents stale DB connections
-    future=True           # SQLAlchemy 2.0 compatible
+    pool_pre_ping=True,   
+    future=True           
 )
 
 SessionLocal = sessionmaker(

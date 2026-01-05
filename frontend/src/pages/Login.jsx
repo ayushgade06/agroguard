@@ -25,7 +25,6 @@ export default function Login() {
     try {
       const data = await loginUser(email.trim(), password);
 
-      // ✅ IMPORTANT: token key MUST be "token"
       localStorage.setItem("token", data.access_token);
 
       navigate("/dashboard");

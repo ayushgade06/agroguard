@@ -7,10 +7,9 @@ export default function ProtectedRoute({ children }) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     
-    // Check if token exists and is valid format (JWT tokens are long)
     if (!token || token === "undefined" || token === "null" || token.length < 50) {
       console.warn("Invalid or missing token, redirecting to login");
-      localStorage.clear(); // Clear all auth data
+      localStorage.clear(); 
       navigate("/login", { replace: true });
     }
   }, [navigate]);

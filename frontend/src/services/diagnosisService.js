@@ -14,9 +14,8 @@ export async function analyzeCropImage(file, latitude, longitude) {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
-      // ❌ DO NOT set Content-Type for FormData
     },
-    body: formData, // 🔥 THIS WAS MISSING
+    body: formData, 
   });
 
   if (!res.ok) {
