@@ -42,12 +42,12 @@ export default function Header({ location, farmerName }) {
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-white border-b">
       {/* LEFT: BRAND */}
-      <div className="flex items-center gap-2">
+      {/* <div className="flex items-center gap-2">
         <Leaf className="text-emerald-600" size={22} />
         <span className="font-extrabold tracking-wide text-slate-800">
           AGRIGUARD
         </span>
-      </div>
+      </div> */}
 
       {/* CENTER: LOCATION */}
       <div className="flex items-center gap-2 text-sm text-slate-600">
