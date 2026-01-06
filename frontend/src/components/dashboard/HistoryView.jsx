@@ -25,20 +25,28 @@ export default function HistoryView({
 
   return (
     <motion.div
-      className="max-w-5xl mx-auto px-6 py-6 space-y-5"
+      className="max-w-6xl mx-auto px-8 py-6 space-y-6"
       variants={shouldAnimate ? containerVariants : undefined}
       initial={shouldAnimate ? "hidden" : false}
       animate={shouldAnimate ? "visible" : false}
     >
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-slate-800">
-          Detection History
-        </h2>
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">
+            Detection History
+          </h2>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Review your previous crop analyses
+          </p>
+        </div>
+
         <p className="text-sm text-slate-500">
           {safeHistory.length} record{safeHistory.length !== 1 && "s"}
         </p>
       </div>
 
+      {/* List */}
       <AnimatePresence>
         {safeHistory.map((item) => (
           <motion.div
@@ -48,7 +56,8 @@ export default function HistoryView({
             animate={shouldAnimate ? "visible" : false}
             exit="exit"
           >
-            <div className="bg-white border border-slate-200 rounded-xl px-6 py-5 flex items-center justify-between hover:shadow-md transition">
+            <div className="bg-white border border-slate-200 rounded-xl px-6 py-5 flex items-center justify-between transition hover:shadow-md hover:border-slate-300">
+              {/* Left */}
               <div
                 className="space-y-1 cursor-pointer"
                 onClick={() => onSelect?.(item)}
@@ -67,17 +76,20 @@ export default function HistoryView({
                 </p>
               </div>
 
-              <div className="flex items-center gap-6">
+              {/* Right */}
+              <div className="flex items-center gap-8">
                 <div className="text-right">
-                  <p className="text-xs text-slate-500">Confidence</p>
-                  <p className="font-semibold text-slate-700">
+                  <p className="text-xs uppercase tracking-wide text-slate-400">
+                    Confidence
+                  </p>
+                  <p className="text-base font-semibold text-slate-700">
                     {Math.round(item.confidence * 100)}%
                   </p>
                 </div>
 
                 <button
                   onClick={() => onDelete?.(item.id)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-red-600 border border-red-200 rounded-lg transition hover:bg-red-50 hover:border-red-300"
                 >
                   <Trash2 size={14} />
                   Delete
@@ -88,9 +100,13 @@ export default function HistoryView({
         ))}
       </AnimatePresence>
 
+      {/* Empty State */}
       {safeHistory.length === 0 && (
-        <div className="text-center text-slate-500 text-sm py-16">
+        <div className="text-center text-slate-500 text-sm py-20">
           No detection history yet.
+          <p className="mt-1 text-xs text-slate-400">
+            Your past crop scans will appear here.
+          </p>
         </div>
       )}
     </motion.div>

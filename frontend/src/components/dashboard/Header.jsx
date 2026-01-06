@@ -1,16 +1,16 @@
-import { Leaf, MapPin, Bell } from "lucide-react";
+import { Leaf, MapPin, Bell, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   fetchNotifications,
   markNotificationRead,
 } from "../../services/notificationService";
 
-export default function Header({ location }) {
+export default function Header({ location, farmerName }) {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const unreadCount = Array.isArray(notifications) 
-    ? notifications.filter((n) => !n.is_read).length 
+  const unreadCount = Array.isArray(notifications)
+    ? notifications.filter((n) => !n.is_read).length
     : 0;
 
   useEffect(() => {
@@ -18,14 +18,13 @@ export default function Header({ location }) {
       const data = await fetchNotifications();
       setNotifications(Array.isArray(data) ? data : []);
     };
-    
+
     loadNotifications();
-    
-    // Poll every 30 seconds
+
     const interval = setInterval(() => {
       loadNotifications();
     }, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -41,16 +40,17 @@ export default function Header({ location }) {
   };
 
   return (
-    <header className="flex justify-between items-center px-6 py-4 bg-white border-b">
-      {/* LEFT: LOGO */}
+    <header className="flex items-center justify-between px-8 py-4 bg-white border-b">
+      {/* LEFT: BRAND */}
       <div className="flex items-center gap-2">
-        {/* <Leaf className="text-emerald-600" size={22} />
-        <span className="font-black tracking-wide text-slate-800">
+        <Leaf className="text-emerald-600" size={22} />
+        <span className="font-extrabold tracking-wide text-slate-800">
           AGRIGUARD
-        </span> */}
+        </span>
       </div>
 
-      <div className="flex items-center gap-6 text-sm text-slate-600">
+      {/* CENTER: LOCATION */}
+      <div className="flex items-center gap-2 text-sm text-slate-600">
         {location?.error ? (
           <span className="flex items-center gap-1 text-red-500">
             <MapPin size={14} />
@@ -59,7 +59,8 @@ export default function Header({ location }) {
         ) : location?.city ? (
           <span className="flex items-center gap-1">
             <MapPin size={14} />
-            {location.city}, {location.state}
+            {location.city}
+            {location.state ? `, ${location.state}` : ""}
           </span>
         ) : (
           <span className="flex items-center gap-1">
@@ -67,7 +68,19 @@ export default function Header({ location }) {
             Detecting location…
           </span>
         )}
+      </div>
 
+      {/* RIGHT: USER + NOTIFICATIONS */}
+      <div className="flex items-center gap-6">
+        {/* Farmer Name */}
+        <div className="flex items-center gap-2 text-sm text-slate-700">
+          <User size={16} />
+          <span className="font-medium">
+            {farmerName ? `Hi, ${farmerName}` : "Welcome"}
+          </span>
+        </div>
+
+        {/* Notifications */}
         <div className="relative">
           <Bell
             size={20}
@@ -87,9 +100,11 @@ export default function Header({ location }) {
           )}
 
           {showNotifications && (
-            <div className="absolute right-0 top-8 w-80 bg-white border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
-              <div className="p-3 border-b bg-slate-50">
-                <h3 className="font-semibold text-sm">Notifications</h3>
+            <div className="absolute right-0 top-9 w-80 bg-white border rounded-xl shadow-xl z-50 overflow-hidden">
+              <div className="px-4 py-3 border-b bg-slate-50">
+                <h3 className="font-semibold text-sm text-slate-800">
+                  Notifications
+                </h3>
               </div>
 
               {notifications.length === 0 ? (
@@ -97,18 +112,27 @@ export default function Header({ location }) {
                   No notifications
                 </div>
               ) : (
-                <div className="divide-y">
+                <div className="max-h-80 overflow-y-auto divide-y">
                   {notifications.map((notif) => (
                     <div
                       key={notif.id}
-                      className={`p-3 cursor-pointer hover:bg-slate-50 ${
-                        !notif.is_read ? "bg-emerald-50" : ""
+                      className={`px-4 py-3 cursor-pointer transition ${
+                        !notif.is_read
+                          ? "bg-emerald-50 hover:bg-emerald-100"
+                          : "hover:bg-slate-50"
                       }`}
                       onClick={() => handleNotificationClick(notif)}
                     >
-                      <p className="text-sm text-slate-800">{notif.message}</p>
+                      <p className="text-sm text-slate-800">
+                        {notif.message}
+                      </p>
                       <p className="text-xs text-slate-500 mt-1">
-                        {new Date(notif.created_at).toLocaleString()}
+                        {new Date(notif.created_at).toLocaleDateString(
+                          "en-IN",
+                          {
+                            dateStyle: "medium",
+                          }
+                        )}
                       </p>
                     </div>
                   ))}

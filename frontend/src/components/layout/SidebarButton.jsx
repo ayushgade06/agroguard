@@ -3,7 +3,13 @@ export default function SidebarButton({ label, active, onClick, disabled }) {
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors
+      className={`
+        w-full
+        flex items-center
+        px-4 py-3
+        rounded-xl
+        text-sm font-semibold
+        transition
         ${
           disabled
             ? "text-slate-400 cursor-not-allowed bg-slate-50"

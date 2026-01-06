@@ -156,9 +156,7 @@ export default function Dashboard() {
 
       setResult(diagnosis);
 
-      // 🔑 refresh history immediately after successful scan
       await loadHistory();
-
       setView("result");
     } catch (err) {
       console.error(err);
@@ -184,13 +182,14 @@ export default function Dashboard() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <aside className="w-64 bg-white border-r p-6 flex flex-col">
-        <h1 className="text-2xl font-black text-emerald-700 mb-10">
+    <div className="min-h-screen bg-slate-100 flex">
+      {/* Sidebar */}
+      <aside className="w-64 shrink-0 bg-white border-r px-6 py-8 flex flex-col">
+        <h1 className="text-2xl font-extrabold tracking-wide text-emerald-700 mb-12">
           AGRIGUARD
         </h1>
 
-        <nav className="space-y-2 flex-1">
+        <nav className="space-y-1 flex-1">
           <SidebarButton
             label="Home"
             active={view === "home"}
@@ -220,7 +219,7 @@ export default function Dashboard() {
           />
         </nav>
 
-        <div className="pt-4 border-t">
+        <div className="pt-6 border-t">
           <LogoutButton />
         </div>
 
@@ -233,10 +232,11 @@ export default function Dashboard() {
         />
       </aside>
 
-      <main className="flex-1 flex flex-col">
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden">
         <Header location={location} />
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto px-8 py-6">
           {view === "home" && (
             <HomeView
               onSelectImage={handleFileChange}
@@ -245,7 +245,9 @@ export default function Dashboard() {
           )}
 
           {view === "map" && (
-            <MapView location={location} />
+            <div className="h-full">
+              <MapView location={location} />
+            </div>
           )}
 
           {view === "scan" && currentImage && (
@@ -275,6 +277,7 @@ export default function Dashboard() {
                 setResult({
                   disease: item.disease,
                   confidence: item.confidence,
+                  severity: item.severity,
                   explanation:
                     item.explanation ||
                     `The model detected ${item.disease} with ${(item.confidence * 100).toFixed(2)}% confidence.`,
@@ -291,7 +294,6 @@ export default function Dashboard() {
               onDelete={handleDelete}
             />
           )}
-
         </div>
       </main>
     </div>

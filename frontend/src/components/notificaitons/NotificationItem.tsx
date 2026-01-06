@@ -7,11 +7,15 @@ export default function NotificationItem({
 }) {
   return (
     <div
-      className={`p-4 border-b cursor-pointer transition
+      className={`
+        px-4 py-3
+        border-b
+        cursor-pointer
+        transition
         ${
           notification.is_read
-            ? "bg-white"
-            : "bg-green-50 hover:bg-green-100"
+            ? "bg-white hover:bg-slate-50"
+            : "bg-emerald-50 hover:bg-emerald-100"
         }
       `}
     >
@@ -21,7 +25,7 @@ export default function NotificationItem({
       </p>
 
       {/* Message */}
-      <p className="text-xs text-slate-600 mt-1">
+      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
         {notification.message}
       </p>
 
