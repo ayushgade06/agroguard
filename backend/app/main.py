@@ -17,6 +17,7 @@ from app.deps import get_db
 from app.routes.detection import router as detection_router
 from app.routes.notifications import router as notification_router
 from app.routes.history import router as history_router
+from app.routes.risk_map import router as risk_map_router
 
 # ---------------- DB INIT ---------------- #
 Base.metadata.create_all(bind=engine)
@@ -100,3 +101,4 @@ def protected_route(
 app.include_router(detection_router)
 app.include_router(notification_router)
 app.include_router(history_router)
+app.include_router(risk_map_router)

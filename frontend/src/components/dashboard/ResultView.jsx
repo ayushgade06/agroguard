@@ -6,7 +6,6 @@ export default function ResultView({ result, onDone }) {
   const {
     disease = "Unknown",
     confidence = 0,
-    severity = "—",
     explanation = "",
     immediateActions = [],
   } = result;
@@ -27,18 +26,11 @@ export default function ResultView({ result, onDone }) {
           {disease}
         </p>
 
-        <div className="flex gap-6 mb-6">
-          <div>
-            <p className="text-sm text-slate-500">Confidence</p>
-            <p className="font-semibold">
-              {(confidence * 100).toFixed(1)}%
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-slate-500">Severity</p>
-            <p className="font-semibold">{severity}</p>
-          </div>
+        <div className="mb-6">
+          <p className="text-sm text-slate-500">Confidence</p>
+          <p className="font-semibold">
+            {(confidence * 100).toFixed(1)}%
+          </p>
         </div>
 
         {explanation && (
@@ -63,8 +55,7 @@ export default function ResultView({ result, onDone }) {
         <div className="flex justify-end">
           <button
             onClick={onDone}
-            className="px-6 py-2 rounded-lg bg-emerald-600
-                       text-white font-semibold hover:bg-emerald-700"
+            className="px-6 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700"
           >
             Done
           </button>

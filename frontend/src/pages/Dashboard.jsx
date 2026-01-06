@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 
 import Header from "../components/dashboard/Header";
-import HomeView from "../components/dashboard/HomeView";
 import ScanView from "../components/dashboard/ScanView";
 import ResultView from "../components/dashboard/ResultView";
 import HistoryView from "../components/dashboard/HistoryView";
 import LogoutButton from "../components/layout/LogoutButton";
 import SidebarButton from "../components/layout/SidebarButton";
+import HomeView from "../components/dashboard/HomeView";
+
+import MapView from "../pages/MapView";
 
 import { analyzeCropImage } from "../services/diagnosisService";
 import {
@@ -32,6 +34,7 @@ export default function Dashboard() {
     error: null,
   });
 
+  /* ---------------- Location ---------------- */
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -84,18 +87,40 @@ export default function Dashboard() {
     );
   }, []);
 
+  /* ---------------- History ---------------- */
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    loadHistory();
+  }, []);
 
+  async function loadHistory() {
+    const token = localStorage.getItem("token");
     if (!token) {
       setHistory([]);
       return;
     }
 
-    loadHistory();
-  }, [localStorage.getItem("token")]);
+    setHistoryLoading(true);
+    try {
+      const data = await fetchHistory();
+      setHistory(Array.isArray(data) ? data : []);
+    } catch {
+      console.error("Failed to load history");
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
 
+  const handleDelete = async (id) => {
+    try {
+      await deleteHistoryItem(id);
+      setHistory((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert(err.message || "Failed to delete record");
+    }
+  };
+
+  /* ---------------- Scan ---------------- */
 
   const handleFileChange = (file) => {
     if (!file) return;
@@ -111,7 +136,6 @@ export default function Dashboard() {
 
     setView("scan");
   };
-
 
   const startAnalysis = async () => {
     if (!currentImage?.file) return;
@@ -131,7 +155,10 @@ export default function Dashboard() {
       );
 
       setResult(diagnosis);
+
+      // 🔑 refresh history immediately after successful scan
       await loadHistory();
+
       setView("result");
     } catch (err) {
       console.error(err);
@@ -151,33 +178,10 @@ export default function Dashboard() {
     }
   };
 
-
-  async function loadHistory() {
-    setHistoryLoading(true);
-    try {
-      const data = await fetchHistory();
-      setHistory(data);
-    } catch {
-      alert("Failed to load history");
-    } finally {
-      setHistoryLoading(false);
-    }
-  }
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteHistoryItem(id);
-      setHistory((prev) =>
-        prev.filter((item) => item.id !== id)
-      );
-    } catch (err) {
-      alert(err.message || "Failed to delete record");
-    }
-  };
-
   const locationReady =
     location.latitude && location.longitude && !location.error;
 
+  /* ---------------- UI ---------------- */
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -194,6 +198,12 @@ export default function Dashboard() {
           />
 
           <SidebarButton
+            label="Map"
+            active={view === "map"}
+            onClick={() => setView("map")}
+          />
+
+          <SidebarButton
             label="Scan Crop"
             active={view === "scan"}
             disabled={!locationReady}
@@ -206,10 +216,7 @@ export default function Dashboard() {
           <SidebarButton
             label="History"
             active={view === "history"}
-            onClick={() => {
-              setView("history");
-              loadHistory();
-            }}
+            onClick={() => setView("history")}
           />
         </nav>
 
@@ -229,12 +236,16 @@ export default function Dashboard() {
       <main className="flex-1 flex flex-col">
         <Header location={location} />
 
-        <div className="flex-1 p-10 overflow-y-auto">
+        <div className="flex-1 overflow-hidden">
           {view === "home" && (
             <HomeView
               onSelectImage={handleFileChange}
               history={history}
             />
+          )}
+
+          {view === "map" && (
+            <MapView location={location} />
           )}
 
           {view === "scan" && currentImage && (
@@ -261,12 +272,26 @@ export default function Dashboard() {
               history={history}
               loading={historyLoading}
               onSelect={(item) => {
-                setResult(item);
+                setResult({
+                  disease: item.disease,
+                  confidence: item.confidence,
+                  explanation:
+                    item.explanation ||
+                    `The model detected ${item.disease} with ${(item.confidence * 100).toFixed(2)}% confidence.`,
+                  immediateActions:
+                    item.immediate_actions || [
+                      "Isolate affected crops",
+                      "Avoid overhead irrigation",
+                      "Consult local agriculture officer",
+                    ],
+                });
+
                 setView("result");
               }}
               onDelete={handleDelete}
             />
           )}
+
         </div>
       </main>
     </div>

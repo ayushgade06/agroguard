@@ -6,11 +6,24 @@ const API_BASE_URL = "http://127.0.0.1:8000";
 export async function fetchHistory() {
   const token = localStorage.getItem("token");
 
-  const res = await fetch(`${API_BASE_URL}/detections`, {
+  if (!token) {
+    console.warn("No token found, skipping history fetch");
+    return [];
+  }
+
+  const res = await fetch(`${API_BASE_URL}/detections/`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+
+  // 🔐 Handle expired / invalid token
+  if (res.status === 401) {
+    console.warn("Token expired while fetching history");
+    localStorage.clear();
+    window.location.href = "/login";
+    return [];
+  }
 
   const data = await res.json();
 
@@ -18,7 +31,7 @@ export async function fetchHistory() {
     throw new Error(data.detail || "Failed to fetch history");
   }
 
-  return data;
+  return Array.isArray(data) ? data : [];
 }
 
 /**
@@ -27,12 +40,24 @@ export async function fetchHistory() {
 export async function deleteHistoryItem(id) {
   const token = localStorage.getItem("token");
 
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
   const res = await fetch(`${API_BASE_URL}/detections/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+
+  // 🔐 Handle expired / invalid token
+  if (res.status === 401) {
+    console.warn("Token expired while deleting history item");
+    localStorage.clear();
+    window.location.href = "/login";
+    return;
+  }
 
   const data = await res.json();
 

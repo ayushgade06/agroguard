@@ -14,7 +14,9 @@ def predict_image(image):
     confidence = float(np.max(probs))
     class_idx = int(np.argmax(probs))
 
+    print("Real TF model predict called")
+
     return {
-        "label": CLASS_NAMES[class_idx],
+        "class": CLASS_NAMES[class_idx],
         "confidence": round(confidence, 4)
     }

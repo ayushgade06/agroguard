@@ -8,7 +8,9 @@ from app.models.user import User
 from app.models.detection import Detection
 from app.models.notification import Notification
 from app.utils.distance import haversine
-from app.ml.inference import predict
+
+# ✅ REAL ML IMPORT (TensorFlow image classifier)
+from app.ml.image_classifier.predictor import predict_image
 
 router = APIRouter(prefix="/detections", tags=["Detections"])
 
@@ -40,7 +42,7 @@ async def detect_disease(
         raise HTTPException(status_code=400, detail="Invalid image file")
 
     # ---------------- ML INFERENCE ----------------
-    result = predict(image)
+    result = predict_image(image)
     disease = result.get("class", "Unknown")
     confidence = float(result.get("confidence", 0.0))
 
