@@ -44,15 +44,13 @@ export default function Header({ location }) {
     <header className="flex justify-between items-center px-6 py-4 bg-white border-b">
       {/* LEFT: LOGO */}
       <div className="flex items-center gap-2">
-        <Leaf className="text-emerald-600" size={22} />
+        {/* <Leaf className="text-emerald-600" size={22} />
         <span className="font-black tracking-wide text-slate-800">
           AGRIGUARD
-        </span>
+        </span> */}
       </div>
 
-      {/* RIGHT: LOCATION + NOTIFICATIONS */}
       <div className="flex items-center gap-6 text-sm text-slate-600">
-        {/* LOCATION */}
         {location?.error ? (
           <span className="flex items-center gap-1 text-red-500">
             <MapPin size={14} />
@@ -70,7 +68,6 @@ export default function Header({ location }) {
           </span>
         )}
 
-        {/* NOTIFICATION BELL */}
         <div className="relative">
           <Bell
             size={20}
@@ -89,7 +86,6 @@ export default function Header({ location }) {
             </span>
           )}
 
-          {/* NOTIFICATION DROPDOWN */}
           {showNotifications && (
             <div className="absolute right-0 top-8 w-80 bg-white border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
               <div className="p-3 border-b bg-slate-50">

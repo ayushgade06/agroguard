@@ -1,6 +1,10 @@
 import { Notification } from "../../types/notification";
 
-export default function NotificationItem({ notification }: { notification: Notification }) {
+export default function NotificationItem({
+  notification,
+}: {
+  notification: Notification;
+}) {
   return (
     <div
       className={`p-4 border-b cursor-pointer transition
@@ -11,26 +15,29 @@ export default function NotificationItem({ notification }: { notification: Notif
         }
       `}
     >
+      {/* Title */}
       <p className="text-sm font-semibold text-slate-800">
         {notification.title}
       </p>
 
+      {/* Message */}
       <p className="text-xs text-slate-600 mt-1">
         {notification.message}
       </p>
 
+      {/* Date only */}
       <p className="text-[10px] text-slate-400 mt-2">
-        {formatToIST(notification.created_at)}
+        {notification.created_at
+          ? formatDateOnly(notification.created_at)
+          : "—"}
       </p>
     </div>
   );
 }
 
-
-function formatToIST(dateString: string) {
-  return new Date(dateString).toLocaleString("en-IN", {
+function formatDateOnly(dateString: string) {
+  return new Date(dateString).toLocaleDateString("en-IN", {
     timeZone: "Asia/Kolkata",
     dateStyle: "medium",
-    timeStyle: "short",
   });
 }

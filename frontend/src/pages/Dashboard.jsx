@@ -131,6 +131,7 @@ export default function Dashboard() {
       );
 
       setResult(diagnosis);
+      await loadHistory();
       setView("result");
     } catch (err) {
       console.error(err);
