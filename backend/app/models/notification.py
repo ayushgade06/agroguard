@@ -1,6 +1,14 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    JSON,
+)
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from sqlalchemy.sql import func
 
 from app.models.database import Base
 
@@ -10,18 +18,19 @@ class Notification(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    # Who receives the notification
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    # Notification content
     title = Column(String, nullable=False)
     message = Column(String, nullable=False)
 
-    # Status
+    data = Column(JSON, nullable=True)
+
     is_read = Column(Boolean, default=False, nullable=False)
 
-    # Metadata
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
 
-    # Relationships
     user = relationship("User", back_populates="notifications")

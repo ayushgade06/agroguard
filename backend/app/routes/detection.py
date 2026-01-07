@@ -1,4 +1,3 @@
-import json
 from fastapi import APIRouter, UploadFile, File, Depends, Form, HTTPException
 from sqlalchemy.orm import Session
 from PIL import Image
@@ -10,7 +9,7 @@ from app.models.detection import Detection
 from app.models.notification import Notification
 from app.utils.distance import haversine
 
-# ✅ REAL ML IMPORT (TensorFlow image classifier)
+# ✅ REAL ML IMPORTS
 from app.ml.image_classifier.predictor import predict_image
 from app.ml.potato_disease.predictor import predict as predict_potato
 
@@ -40,10 +39,10 @@ async def detect_disease(
     1. Receives image + location
     2. Runs ML model
     3. Stores detection
-    4. Notifies users within 5km radius
+    4. Notifies nearby users
     """
 
-    # ---------------- VALIDATION ----------------
+    # ---------- VALIDATION ----------
     if file.content_type not in ["image/jpeg", "image/png"]:
         raise HTTPException(status_code=400, detail="Invalid image format")
 
@@ -52,7 +51,7 @@ async def detect_disease(
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid image file")
 
-    # ---------------- ML INFERENCE ----------------
+    # ---------- ML INFERENCE ----------
     crop_normalized = (crop or "rice").strip().lower()
 
     if crop_normalized == "potato":
@@ -64,11 +63,10 @@ async def detect_disease(
         disease = result.get("class", "Unknown")
         confidence = float(result.get("confidence", 0.0))
 
-    # clamp confidence between 0 and 1 to avoid >100% displays
     confidence = max(0.0, min(confidence, 1.0))
     severity = compute_severity(confidence)
 
-    # ---------------- STORE DETECTION ----------------
+    # ---------- STORE DETECTION ----------
     detection = Detection(
         user_id=current_user.id,
         disease=disease,
@@ -76,17 +74,16 @@ async def detect_disease(
         latitude=latitude,
         longitude=longitude,
     )
-
     db.add(detection)
 
-    # ---------------- UPDATE USER LOCATION ----------------
+    # ---------- UPDATE USER LOCATION ----------
     current_user.latitude = latitude
     current_user.longitude = longitude
 
     db.commit()
     db.refresh(detection)
 
-    # ---------------- NOTIFY USERS WITHIN 5 KM ----------------
+    # ---------- NOTIFY NEARBY USERS ----------
     nearby_users = (
         db.query(User)
         .filter(
@@ -106,22 +103,22 @@ async def detect_disease(
         )
 
         if distance <= RADIUS_KM:
-            meta = {
-                "disease": disease,
-                "crop": "potato" if crop_normalized == "potato" else "rice",
-                "distance_km": round(distance, 2),
-                "farmer": current_user.name or "A nearby farmer",
-            }
             notification = Notification(
                 user_id=user.id,
                 title="⚠️ Disease/Pest Alert Nearby",
-                message=json.dumps(meta),
+                message=f"{disease} detected near your location",
+                data={
+                    "disease": disease,
+                    "crop": "potato" if crop_normalized == "potato" else "rice",
+                    "distance_km": round(distance, 2),
+                    "farmer": current_user.name or "A nearby farmer",
+                },
             )
             db.add(notification)
 
     db.commit()
 
-    # ---------------- RESPONSE (FRONTEND SAFE) ----------------
+    # ---------- RESPONSE ----------
     return {
         "disease": disease,
         "confidence": confidence,

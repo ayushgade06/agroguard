@@ -38,7 +38,11 @@ export default function NotificationList({
       {/* List */}
       <div className="max-h-80 overflow-y-auto divide-y">
         {notifications.map((n) => (
-          <NotificationItem key={n.id} notification={n} onClick={onSelect} />
+          <NotificationItem
+            key={n.id}
+            notification={n}
+            onClick={onSelect}
+          />
         ))}
       </div>
     </div>

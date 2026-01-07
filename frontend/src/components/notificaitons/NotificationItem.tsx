@@ -1,4 +1,6 @@
 import { Notification } from "../../types/notification";
+import { formatDistance } from "../../utils/formatDistance";
+import { formatToIST } from "../../utils/formatTime";
 
 export default function NotificationItem({
   notification,
@@ -7,44 +9,48 @@ export default function NotificationItem({
   notification: Notification;
   onClick?: (n: Notification) => void;
 }) {
+  const meta = notification.metadata;
+  const distance = formatDistance(meta?.distance_km);
+
   return (
     <div
-      className={`
-        px-4 py-3
-        border-b
-        cursor-pointer
-        transition
+      onClick={() => onClick?.(notification)}
+      className={`p-4 border-b transition cursor-pointer
         ${
           notification.is_read
-            ? "bg-white hover:bg-slate-50"
-            : "bg-emerald-50 hover:bg-emerald-100"
-        }
-      `}
-      onClick={() => onClick?.(notification)}
+            ? "bg-white"
+            : "bg-green-50 hover:bg-green-100"
+        }`}
     >
       {/* Title */}
-      <p className="text-sm font-semibold text-slate-800">
+      <p className="text-sm font-semibold text-red-700">
         {notification.title}
       </p>
 
-      {/* Message */}
-      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-        {notification.message}
+      {/* Main message */}
+      <p className="text-sm mt-1 text-slate-800">
+        <b>{meta?.disease ?? "Disease"}</b> detected in{" "}
+        <b>{meta?.crop ?? "crop"}</b>
       </p>
 
-      {/* Date only */}
+      {/* Farmer */}
+      {meta?.farmer && (
+        <p className="text-xs text-slate-600 mt-0.5">
+          👨‍🌾 Farmer: {meta.farmer}
+        </p>
+      )}
+
+      {/* Distance */}
+      {distance && (
+        <p className="text-xs text-slate-600">
+          📍 Distance: {distance}
+        </p>
+      )}
+
+      {/* Date */}
       <p className="text-[10px] text-slate-400 mt-2">
-        {notification.created_at
-          ? formatDateOnly(notification.created_at)
-          : "—"}
+        {formatToIST(notification.created_at)}
       </p>
     </div>
   );
-}
-
-function formatDateOnly(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-IN", {
-    timeZone: "Asia/Kolkata",
-    dateStyle: "medium",
-  });
 }

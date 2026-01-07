@@ -23,32 +23,24 @@ def get_notifications(
         .order_by(Notification.created_at.desc())
         .all()
     )
+
     enriched = []
     for n in notifications:
-        details = {
-            "id": n.id,
-            "title": n.title,
-            "message": n.message,
-            "is_read": n.is_read,
-            "created_at": n.created_at,
-            "disease": None,
-            "crop": None,
-            "distance_km": None,
-            "farmer": None,
-        }
-        # Try to parse structured meta (JSON string) if present
-        try:
-            meta = json.loads(n.message)
-            if isinstance(meta, dict):
-                details["disease"] = meta.get("disease")
-                details["crop"] = meta.get("crop")
-                details["distance_km"] = meta.get("distance_km")
-                details["farmer"] = meta.get("farmer")
-                details["message"] = meta.get("message") or n.message
-        except Exception:
-            pass
+        enriched.append(
+            {
+                "id": n.id,
+                "title": n.title,
+                "message": n.message,
+                "is_read": n.is_read,
+                "created_at": n.created_at,
 
-        enriched.append(details)
+                # Structured data from JSON column
+                "disease": n.data.get("disease") if n.data else None,
+                "crop": n.data.get("crop") if n.data else None,
+                "distance_km": n.data.get("distance_km") if n.data else None,
+                "farmer": n.data.get("farmer") if n.data else None,
+            }
+        )
 
     return enriched
 
@@ -60,7 +52,7 @@ def mark_notification_as_read(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Mark a notification as read
+    Mark a single notification as read
     """
     notification = (
         db.query(Notification)
@@ -92,7 +84,7 @@ def mark_all_as_read(
         db.query(Notification)
         .filter(
             Notification.user_id == current_user.id,
-            Notification.is_read == False,
+            Notification.is_read.is_(False),
         )
         .update({"is_read": True})
     )
