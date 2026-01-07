@@ -4,9 +4,11 @@ import { Notification } from "../../types/notification";
 export default function NotificationList({
   notifications,
   loading,
+  onSelect,
 }: {
   notifications: Notification[];
   loading: boolean;
+  onSelect?: (n: Notification) => void;
 }) {
   if (loading) {
     return (
@@ -36,7 +38,7 @@ export default function NotificationList({
       {/* List */}
       <div className="max-h-80 overflow-y-auto divide-y">
         {notifications.map((n) => (
-          <NotificationItem key={n.id} notification={n} />
+          <NotificationItem key={n.id} notification={n} onClick={onSelect} />
         ))}
       </div>
     </div>

@@ -1,3 +1,4 @@
+import json
 from fastapi import APIRouter, UploadFile, File, Depends, Form, HTTPException
 from sqlalchemy.orm import Session
 from PIL import Image
@@ -11,10 +12,19 @@ from app.utils.distance import haversine
 
 # ✅ REAL ML IMPORT (TensorFlow image classifier)
 from app.ml.image_classifier.predictor import predict_image
+from app.ml.potato_disease.predictor import predict as predict_potato
 
 router = APIRouter(prefix="/detections", tags=["Detections"])
 
-RADIUS_KM = 5
+RADIUS_KM = 15
+
+
+def compute_severity(confidence: float) -> str:
+    if confidence >= 0.8:
+        return "High"
+    if confidence >= 0.5:
+        return "Medium"
+    return "Low"
 
 
 @router.post("/")
@@ -22,6 +32,7 @@ async def detect_disease(
     file: UploadFile = File(...),
     latitude: float = Form(...),
     longitude: float = Form(...),
+    crop: str = Form("rice"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -42,9 +53,20 @@ async def detect_disease(
         raise HTTPException(status_code=400, detail="Invalid image file")
 
     # ---------------- ML INFERENCE ----------------
-    result = predict_image(image)
-    disease = result.get("class", "Unknown")
-    confidence = float(result.get("confidence", 0.0))
+    crop_normalized = (crop or "rice").strip().lower()
+
+    if crop_normalized == "potato":
+        result = predict_potato(image)
+        disease = result.get("disease", "Unknown")
+        confidence = float(result.get("confidence", 0.0))
+    else:
+        result = predict_image(image)
+        disease = result.get("class", "Unknown")
+        confidence = float(result.get("confidence", 0.0))
+
+    # clamp confidence between 0 and 1 to avoid >100% displays
+    confidence = max(0.0, min(confidence, 1.0))
+    severity = compute_severity(confidence)
 
     # ---------------- STORE DETECTION ----------------
     detection = Detection(
@@ -84,10 +106,16 @@ async def detect_disease(
         )
 
         if distance <= RADIUS_KM:
+            meta = {
+                "disease": disease,
+                "crop": "potato" if crop_normalized == "potato" else "rice",
+                "distance_km": round(distance, 2),
+                "farmer": current_user.name or "A nearby farmer",
+            }
             notification = Notification(
                 user_id=user.id,
-                title="⚠️ Disease Alert Nearby",
-                message=f"{disease} detected within 5 km of your area",
+                title="⚠️ Disease/Pest Alert Nearby",
+                message=json.dumps(meta),
             )
             db.add(notification)
 
@@ -97,7 +125,8 @@ async def detect_disease(
     return {
         "disease": disease,
         "confidence": confidence,
-        "severity": "High" if confidence > 0.8 else "Medium",
+        "severity": severity,
+        "crop": "potato" if crop_normalized == "potato" else "rice",
         "explanation": f"The model detected {disease} with {confidence:.2%} confidence.",
         "immediateActions": [
             "Isolate affected crops",

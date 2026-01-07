@@ -16,13 +16,14 @@ export default function LogoutButton() {
       onClick={handleLogout}
       className="
         w-full
-        flex items-center gap-2
+        flex items-center gap-3
         px-4 py-3
         rounded-xl
         text-sm font-semibold
         text-red-600
         transition
         hover:bg-red-50
+        border border-red-100
       "
     >
       <LogOut size={16} />

@@ -3,7 +3,7 @@ const API_BASE_URL = "http://127.0.0.1:8000";
 /**
  * Fetch detection history
  */
-export async function fetchHistory() {
+export async function fetchHistory(severity) {
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -11,7 +11,9 @@ export async function fetchHistory() {
     return [];
   }
 
-  const res = await fetch(`${API_BASE_URL}/detections/`, {
+  const params = severity && severity !== "All" ? `?severity=${severity}` : "";
+
+  const res = await fetch(`${API_BASE_URL}/detections/${params}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -28,10 +28,9 @@ app = FastAPI(title="AgroGuard API")
 # ---------------- MIDDLEWARE ---------------- #
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    # Allow all origins to unblock local dev/preflight for web clients.
+    # Tighten to specific domains when deploying.
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -94,6 +93,19 @@ def protected_route(
         "message": "Access granted",
         "user_id": current_user.id,
         "email": current_user.email,
+    }
+
+
+@app.get("/me")
+def me(
+    current_user: User = Depends(get_current_user),
+):
+    return {
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email,
+        "latitude": current_user.latitude,
+        "longitude": current_user.longitude,
     }
 
 # ---------------- FEATURE ROUTES ---------------- #

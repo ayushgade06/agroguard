@@ -16,6 +16,7 @@ export default function ResultView({ result, onDone }) {
     explanation = "",
     immediateActions = [],
   } = result;
+  const displayConfidence = Math.min(Math.max(confidence, 0), 1);
 
   const [selectedLanguage, setSelectedLanguage] = useState("en-IN");
 
@@ -118,17 +119,20 @@ export default function ResultView({ result, onDone }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-4xl mx-auto px-6"
+      className="max-w-4xl mx-auto px-4 md:px-6"
     >
-      <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
+      <div className="glass-panel rounded-3xl p-8 md:p-10 space-y-7">
 
         {/* Header */}
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-600 font-semibold">
+            AI diagnosis
+          </p>
+          <h2 className="text-3xl font-black text-slate-900 mt-1">
             Diagnosis Result
           </h2>
 
-          <p className="mt-2 text-xl font-semibold text-red-600">
+          <p className="mt-3 text-2xl font-bold text-red-600">
             {translatedDisease}
           </p>
 
@@ -144,15 +148,21 @@ export default function ResultView({ result, onDone }) {
           <p className="text-sm text-slate-500 uppercase tracking-wide">
             Confidence
           </p>
-          <p className="text-2xl font-bold text-slate-800">
-            {(confidence * 100).toFixed(1)}%
+          <div className="h-3 rounded-full bg-slate-200 overflow-hidden mt-2">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-green-400"
+              style={{ width: `${(displayConfidence * 100).toFixed(1)}%` }}
+            />
+          </div>
+          <p className="text-2xl font-bold text-slate-900 mt-2">
+            {(displayConfidence * 100).toFixed(1)}%
           </p>
         </div>
 
         {/* Explanation */}
         {explanation && (
-          <div className="bg-slate-50 border rounded-xl p-5">
-            <p className="text-slate-700">
+          <div className="rounded-2xl bg-gradient-to-r from-slate-50 to-white border border-slate-100 p-6 shadow-inner">
+            <p className="text-slate-700 leading-relaxed">
               {explanation}
             </p>
           </div>
@@ -162,14 +172,14 @@ export default function ResultView({ result, onDone }) {
         {translatedActions.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-slate-800">
+              <h3 className="font-semibold text-slate-900">
                 Recommended Actions
               </h3>
 
               <select
                 value={selectedLanguage}
                 onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="border rounded-md px-2 py-1 text-sm"
+                className="border border-slate-200 rounded-md px-3 py-2 text-sm bg-white shadow-sm"
               >
                 <option value="en-IN">English</option>
                 <option value="hi-IN">हिंदी</option>
@@ -186,9 +196,9 @@ export default function ResultView({ result, onDone }) {
                 {translatedActions.map((a, i) => (
                   <li
                     key={i}
-                    className="flex items-start gap-2 text-slate-700"
+                    className="flex items-start gap-3 text-slate-800 bg-white/60 border border-slate-100 rounded-2xl px-4 py-3 shadow-sm"
                   >
-                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                    <span className="mt-1 w-2 h-2 rounded-full bg-emerald-600" />
                     <span>{a}</span>
                   </li>
                 ))}
@@ -198,7 +208,7 @@ export default function ResultView({ result, onDone }) {
             <button
               onClick={speakActions}
               disabled={translating}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 disabled:opacity-50"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800 disabled:opacity-50"
             >
               🔊 {isSpeaking ? "Stop Reading" : "Read Aloud"}
             </button>
@@ -210,13 +220,13 @@ export default function ResultView({ result, onDone }) {
         )}
 
         {/* Footer */}
-        <div className="flex justify-end pt-4 border-t">
+        <div className="flex justify-end pt-4 border-t border-slate-200/70">
           <button
             onClick={() => {
               window.speechSynthesis.cancel();
               onDone();
             }}
-            className="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold transition hover:bg-emerald-700"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-500 text-white font-semibold transition hover:shadow-lg shadow-emerald-400/30"
           >
             Done
           </button>

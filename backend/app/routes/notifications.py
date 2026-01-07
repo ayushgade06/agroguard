@@ -23,7 +23,34 @@ def get_notifications(
         .order_by(Notification.created_at.desc())
         .all()
     )
-    return notifications
+    enriched = []
+    for n in notifications:
+        details = {
+            "id": n.id,
+            "title": n.title,
+            "message": n.message,
+            "is_read": n.is_read,
+            "created_at": n.created_at,
+            "disease": None,
+            "crop": None,
+            "distance_km": None,
+            "farmer": None,
+        }
+        # Try to parse structured meta (JSON string) if present
+        try:
+            meta = json.loads(n.message)
+            if isinstance(meta, dict):
+                details["disease"] = meta.get("disease")
+                details["crop"] = meta.get("crop")
+                details["distance_km"] = meta.get("distance_km")
+                details["farmer"] = meta.get("farmer")
+                details["message"] = meta.get("message") or n.message
+        except Exception:
+            pass
+
+        enriched.append(details)
+
+    return enriched
 
 
 @router.post("/{notification_id}/read")

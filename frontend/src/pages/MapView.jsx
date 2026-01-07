@@ -1,32 +1,68 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MapContainer,
   TileLayer,
   CircleMarker,
   Popup,
+  useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
+const API_BASE =
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 function getColor(risk) {
-  if (risk === "High") return "#d32f2f";     // red
-  if (risk === "Medium") return "#f57c00";  // orange
-  return "#2e7d32";                         // green
+  if (risk === "High") return "#d32f2f"; // red
+  if (risk === "Medium") return "#f57c00"; // orange
+  return "#2e7d32"; // green
+}
+
+function FitToPoints({ points }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!points.length) return;
+    const bounds = points.map((p) => [
+      p.coordinates.lat,
+      p.coordinates.lon,
+    ]);
+    map.fitBounds(bounds, { padding: [60, 60] });
+  }, [points, map]);
+  return null;
+}
+
+function AutoResize() {
+  const map = useMap();
+  useEffect(() => {
+    map.whenReady(() => {
+      setTimeout(() => map.invalidateSize(), 50);
+    });
+    const handle = () => map.invalidateSize();
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, [map]);
+  return null;
 }
 
 export default function MapView({ location }) {
   const [points, setPoints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function loadRiskMap() {
       try {
-        const res = await fetch(
-          "http://127.0.0.1:8000/risk-map?crop=rice"
-        );
+        setError("");
+        const res = await fetch(`${API_BASE}/risk-map?crop=rice`);
+        if (!res.ok) {
+          throw new Error(`Server responded ${res.status}`);
+        }
         const data = await res.json();
-        setPoints(data.points || []);
+        setPoints(Array.isArray(data.points) ? data.points : []);
       } catch (err) {
         console.error("Failed to load risk map", err);
+        setError(
+          "Could not load risk map. Check backend/ML service availability."
+        );
       } finally {
         setLoading(false);
       }
@@ -35,24 +71,66 @@ export default function MapView({ location }) {
     loadRiskMap();
   }, []);
 
+  const topHotspot = useMemo(() => {
+    if (!points.length) return null;
+    const severityOrder = { High: 3, Medium: 2, Low: 1 };
+    return [...points].sort(
+      (a, b) =>
+        (severityOrder[b.summary?.risk] || 0) -
+          (severityOrder[a.summary?.risk] || 0) ||
+        (b.summary?.confidence || 0) - (a.summary?.confidence || 0)
+    )[0];
+  }, [points]);
+
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center text-slate-500 bg-white border rounded-xl">
+      <div className="h-full flex items-center justify-center text-slate-500 glass-panel rounded-2xl">
         Loading risk map…
       </div>
     );
   }
 
-  return (
-    <div className="h-full w-full bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-      {/* Header */}
-      <div className="px-6 py-4 border-b bg-slate-50">
-        <h2 className="text-lg font-bold text-slate-800">
-          Regional Crop Risk Map
-        </h2>
-        <p className="text-sm text-slate-500">
-          Disease risk visualization based on weather & historical data
+  if (error) {
+    return (
+      <div className="h-full glass-panel rounded-2xl p-6 flex flex-col gap-3 justify-center text-center text-slate-600">
+        <p className="text-lg font-semibold text-slate-800">
+          Risk map unavailable
         </p>
+        <p className="text-sm">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full min-h-[620px] w-full glass-panel rounded-3xl overflow-hidden flex flex-col shadow-lg">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-slate-200/70 bg-white/70 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-600 font-semibold">
+            Geo intelligence
+          </p>
+          <h2 className="text-xl font-bold text-slate-900">
+            Regional Crop Risk Map
+          </h2>
+          <p className="text-sm text-slate-500">
+            Disease risk visualization powered by the ML weather model
+          </p>
+        </div>
+
+        {topHotspot && (
+          <div className="px-4 py-3 rounded-2xl bg-red-50 text-red-700 border border-red-100 shadow-sm">
+            <p className="text-xs uppercase tracking-wide font-semibold">
+              Highest risk now
+            </p>
+            <p className="text-sm font-bold">
+              {topHotspot.city}: {topHotspot.summary.disease} (
+              {topHotspot.summary.risk})
+            </p>
+            <p className="text-xs">
+              Confidence {Math.round(topHotspot.summary.confidence * 100)}%
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Map */}
@@ -62,17 +140,21 @@ export default function MapView({ location }) {
           zoom={7}
           scrollWheelZoom
           className="h-full w-full"
+          style={{ minHeight: "600px" }}
         >
           <TileLayer
             attribution="© OpenStreetMap contributors"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
+          <AutoResize />
+          <FitToPoints points={points} />
+
           {points.map((p, idx) => (
             <CircleMarker
               key={idx}
               center={[p.coordinates.lat, p.coordinates.lon]}
-              radius={10}
+              radius={12}
               pathOptions={{
                 color: getColor(p.summary.risk),
                 fillColor: getColor(p.summary.risk),
@@ -103,7 +185,7 @@ export default function MapView({ location }) {
         </MapContainer>
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-md text-sm">
+        <div className="absolute bottom-4 left-4 glass-panel rounded-xl px-4 py-3 text-sm">
           <p className="font-semibold text-slate-800 mb-2">
             Risk Levels
           </p>
@@ -122,6 +204,40 @@ export default function MapView({ location }) {
             </div>
           </div>
         </div>
+
+        {/* Forecast panel */}
+        {topHotspot?.forecast && (
+          <div className="absolute bottom-4 right-4 glass-panel rounded-2xl px-4 py-3 text-xs max-w-sm max-h-60 overflow-y-auto space-y-2">
+            <p className="font-semibold text-slate-800">
+              5-day noon forecast: {topHotspot.city}
+            </p>
+            {topHotspot.forecast.map((f, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-3 border-b border-slate-100 pb-1"
+              >
+                <span className="text-slate-600">{f.date}</span>
+                <span className="font-semibold text-slate-800">
+                  {f.disease}
+                </span>
+                <span
+                  className={`text-xs font-bold ${
+                    f.risk === "High"
+                      ? "text-red-600"
+                      : f.risk === "Medium"
+                      ? "text-orange-500"
+                      : "text-emerald-600"
+                  }`}
+                >
+                  {f.risk}
+                </span>
+                <span className="text-slate-500">
+                  {Math.round(f.confidence * 100)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

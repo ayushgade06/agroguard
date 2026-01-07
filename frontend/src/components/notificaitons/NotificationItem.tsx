@@ -2,8 +2,10 @@ import { Notification } from "../../types/notification";
 
 export default function NotificationItem({
   notification,
+  onClick,
 }: {
   notification: Notification;
+  onClick?: (n: Notification) => void;
 }) {
   return (
     <div
@@ -18,6 +20,7 @@ export default function NotificationItem({
             : "bg-emerald-50 hover:bg-emerald-100"
         }
       `}
+      onClick={() => onClick?.(notification)}
     >
       {/* Title */}
       <p className="text-sm font-semibold text-slate-800">

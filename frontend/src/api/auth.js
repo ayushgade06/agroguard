@@ -16,6 +16,20 @@ export async function loginUser(email, password) {
   return data;
 }
 
+export async function fetchProfile(token) {
+  const response = await fetch(`${API_BASE_URL}/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch profile");
+  }
+
+  return response.json();
+}
+
 export async function registerUser(
   name,
   email,

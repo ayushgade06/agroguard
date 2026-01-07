@@ -1,4 +1,9 @@
-export async function analyzeCropImage(file, latitude, longitude) {
+export async function analyzeCropImage(
+  file,
+  latitude,
+  longitude,
+  crop
+) {
   const token = localStorage.getItem("token");
 
   if (!token || token === "undefined" || token === "null") {
@@ -7,25 +12,20 @@ export async function analyzeCropImage(file, latitude, longitude) {
 
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("latitude", latitude);
-  formData.append("longitude", longitude);
+  formData.append("crop", crop || "rice");
+  formData.append("latitude", latitude.toString());
+  formData.append("longitude", longitude.toString());
 
-  const res = await fetch("http://127.0.0.1:8000/detections", {
+  const res = await fetch("http://127.0.0.1:8000/detections/", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    body: formData, 
+    body: formData,
   });
 
   if (!res.ok) {
-    if (res.status === 401) {
-      localStorage.removeItem("token");
-      throw new Error("Session expired - please login again");
-    }
-
     const err = await res.text();
-    console.error("Detection API error:", err);
     throw new Error(err || "Detection failed");
   }
 
