@@ -13,9 +13,15 @@ class Detection(Base):
     # Who made the detection
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
+    # Crop information (IMPORTANT)
+    crop = Column(String, nullable=False)
+
     # ML output
     disease = Column(String, nullable=False)
     confidence = Column(Float, nullable=False)
+
+    # 🔥 Severity derived from confidence
+    severity = Column(String, nullable=False)
 
     # Location of detection
     latitude = Column(Float, nullable=False)

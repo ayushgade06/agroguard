@@ -228,7 +228,7 @@ export default function Dashboard() {
           </span>
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-              AgriGuard
+              AgroGuard
             </p>
             <h1 className="text-xl font-black text-slate-900">
               Crop AI Control

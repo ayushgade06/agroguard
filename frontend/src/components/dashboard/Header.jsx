@@ -51,14 +51,14 @@ export default function Header({ location, farmerName }) {
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-              Agri intelligence
+              Agro intelligence
             </p>
             <p className="text-lg font-bold text-slate-900 flex items-center gap-2">
               Smart Crop & Pest Guardian
-              <span className="tag">
+              {/* <span className="tag">
                 <Sparkles size={14} />
                 Live
-              </span>
+              </span> */}
             </p>
           </div>
         </div>

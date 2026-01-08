@@ -69,8 +69,10 @@ async def detect_disease(
     # ---------- STORE DETECTION ----------
     detection = Detection(
         user_id=current_user.id,
+        crop=crop,
         disease=disease,
         confidence=confidence,
+        severity=severity,  # ✅ FIXED LINE
         latitude=latitude,
         longitude=longitude,
     )
