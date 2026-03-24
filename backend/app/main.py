@@ -20,6 +20,7 @@ from app.routes.notifications import router as notification_router
 from app.routes.history import router as history_router
 from app.routes.risk_map import router as risk_map_router
 from app.api.chatbot import router as chatbot_router
+from app.routes.corn import router as corn_router
 
 # ---------------- DB INIT ---------------- #
 Base.metadata.create_all(bind=engine)
@@ -118,3 +119,6 @@ app.include_router(notification_router)
 app.include_router(history_router)
 app.include_router(risk_map_router)
 app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])
+app.include_router(corn_router)
+
+

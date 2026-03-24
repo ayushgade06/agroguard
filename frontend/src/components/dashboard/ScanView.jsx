@@ -47,7 +47,7 @@ export default function ScanView({
         <div className="flex items-center gap-3 text-sm text-slate-700">
           <span className="font-semibold text-slate-800">Crop:</span>
           <div className="flex gap-2">
-            {["rice", "potato"].map((c) => (
+            {["rice", "potato", "corn"].map((c) => (
               <button
                 key={c}
                 type="button"
@@ -58,7 +58,7 @@ export default function ScanView({
                     : "bg-white text-slate-700 border-slate-200 hover:border-emerald-300"
                 }`}
               >
-                {c === "rice" ? "Rice" : "Potato"}
+                {c.charAt(0).toUpperCase() + c.slice(1)}
               </button>
             ))}
           </div>
