@@ -1,10 +1,14 @@
 import { Leaf, MapPin, Bell, User, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   fetchNotifications,
   markNotificationRead,
 } from "../../services/notificationService";
 import NotificationList from "../notificaitons/NotificationList";
+import NotificationBell from "../notificaitons/NotificationBell";
+import NotificationDetailModal from "../notificaitons/NotificationDetailModal";
+import { AnimatePresence } from "framer-motion";
 
 export default function Header({ location, farmerName }) {
   const [notifications, setNotifications] = useState([]);
@@ -14,6 +18,18 @@ export default function Header({ location, farmerName }) {
   const unreadCount = Array.isArray(notifications)
     ? notifications.filter((n) => !n.is_read).length
     : 0;
+
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -94,70 +110,37 @@ export default function Header({ location, farmerName }) {
             </div>
           </div>
 
-          <div className="relative">
-            <button
-              className="w-11 h-11 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:text-emerald-600 hover:border-emerald-200 transition"
-              onClick={() => setShowNotifications(!showNotifications)}
-            >
-              <Bell size={20} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-semibold shadow">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+          <div className="relative" ref={dropdownRef}>
+            <NotificationBell 
+              unreadCount={unreadCount} 
+              onClick={() => setShowNotifications(!showNotifications)} 
+            />
 
-            {showNotifications && (
-              <div className="absolute right-0 top-12 flex gap-3 z-50">
+            <AnimatePresence>
+              {showNotifications && (
                 <NotificationList
                   notifications={notifications}
                   loading={false}
                   onSelect={handleNotificationClick}
+                  onClearAll={() => setNotifications([])}
                 />
-                {selectedNotification && (
-                  <div className="w-80 glass-panel rounded-2xl p-4 shadow-2xl text-sm text-slate-700">
-                    <p className="text-xs uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-2">
-                      Alert details
-                    </p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {selectedNotification.title}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {new Date(selectedNotification.created_at).toLocaleString(
-                        "en-IN",
-                        { timeZone: "Asia/Kolkata" }
-                      )}
-                    </p>
-                    <div className="mt-3 space-y-1">
-                      <p>
-                        <span className="font-semibold">Crop:</span>{" "}
-                        {selectedNotification.crop || "N/A"}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Disease/Pest:</span>{" "}
-                        {selectedNotification.disease || "N/A"}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Farmer:</span>{" "}
-                        {selectedNotification.farmer || "N/A"}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Distance:</span>{" "}
-                        {selectedNotification.distance_km
-                          ? `${selectedNotification.distance_km} km`
-                          : "N/A"}
-                      </p>
-                    </div>
-                    <p className="mt-3 text-xs text-slate-500 leading-relaxed">
-                      {selectedNotification.message}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
+
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {selectedNotification && (
+            <NotificationDetailModal
+              notification={selectedNotification}
+              onClose={() => setSelectedNotification(null)}
+            />
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </header>
   );
 }

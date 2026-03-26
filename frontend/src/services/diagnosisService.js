@@ -55,3 +55,20 @@ export async function analyzeCropImage(
 
   return data;
 }
+
+export async function analyzeARImage(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("http://127.0.0.1:8000/predict/ar", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err || "AR Detection failed");
+  }
+
+  return await res.json();
+}

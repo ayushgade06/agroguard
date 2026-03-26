@@ -6,6 +6,7 @@ import {
   ScanLine,
   History,
   Sun,
+  Camera,
 } from "lucide-react";
 
 import Header from "../components/dashboard/Header";
@@ -16,6 +17,7 @@ import LogoutButton from "../components/layout/LogoutButton";
 import SidebarButton from "../components/layout/SidebarButton";
 import HomeView from "../components/dashboard/HomeView";
 import MapView from "../pages/MapView";
+import ARView from "../components/dashboard/ARView";
 import { analyzeCropImage } from "../services/diagnosisService";
 import {
   fetchHistory,
@@ -215,6 +217,7 @@ export default function Dashboard() {
       icon: <ScanLine size={18} />,
       disabled: !locationReady,
     },
+    { key: "ar", label: "AR Scan", icon: <Camera size={18} /> },
     { key: "history", label: "History", icon: <History size={18} /> },
   ];
 
@@ -349,6 +352,10 @@ export default function Dashboard() {
                 }}
                 onDelete={handleDelete}
               />
+            )}
+
+            {view === "ar" && (
+                <ARView onStop={() => setView("home")} />
             )}
           </div>
         </div>
