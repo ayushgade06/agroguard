@@ -11,7 +11,7 @@ from app.routes.auth import (
     verify_password,
     create_access_token,
 )
-from app.core.security import get_current_user   # ✅ IMPORT FROM SECURITY
+from app.core.security import get_current_user
 from app.deps import get_db
 
 # ---------------- IMPORT ROUTERS ---------------- #
@@ -21,6 +21,9 @@ from app.routes.history import router as history_router
 from app.routes.risk_map import router as risk_map_router
 from app.api.chatbot import router as chatbot_router
 from app.routes.corn import router as corn_router
+
+# 🔥 NEW AR ROUTER
+from app.routes.ar import router as ar_router
 
 # ---------------- DB INIT ---------------- #
 Base.metadata.create_all(bind=engine)
@@ -64,7 +67,7 @@ def signup(
     return new_user
 
 
-# 🔥 FIXED LOGIN (OAuth2 password flow – REQUIRED FOR SWAGGER)
+# 🔥 LOGIN (OAuth2 password flow – REQUIRED FOR SWAGGER)
 @app.post("/login")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -121,4 +124,5 @@ app.include_router(risk_map_router)
 app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])
 app.include_router(corn_router)
 
-
+# 🔥 REGISTER AR ROUTE
+app.include_router(ar_router)
