@@ -21,6 +21,7 @@ from app.routes.history import router as history_router
 from app.routes.risk_map import router as risk_map_router
 from app.api.chatbot import router as chatbot_router
 from app.routes.corn import router as corn_router
+from app.routes.wheat import router as wheat_router
 
 # 🔥 NEW AR ROUTER
 from app.routes.ar import router as ar_router
@@ -123,6 +124,7 @@ app.include_router(history_router)
 app.include_router(risk_map_router)
 app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])
 app.include_router(corn_router)
+app.include_router(wheat_router)
 
 # 🔥 REGISTER AR ROUTE
 app.include_router(ar_router)

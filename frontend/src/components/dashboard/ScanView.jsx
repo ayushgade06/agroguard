@@ -47,7 +47,7 @@ export default function ScanView({
         <div className="flex items-center gap-3 text-sm text-slate-700">
           <span className="font-semibold text-slate-800">Crop:</span>
           <div className="flex gap-2">
-            {["rice", "potato", "corn"].map((c) => (
+            {["rice", "potato", "corn", "wheat"].map((c) => (
               <button
                 key={c}
                 type="button"

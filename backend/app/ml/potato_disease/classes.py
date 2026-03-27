@@ -1,6 +1,5 @@
 CLASS_NAMES = [
-    # Typical training order for potato models: early, late, healthy
-    "Early Blight",
-    "Late Blight",
-    "Healthy",
+    "Potato__Late_Blight",
+    "Potato__Early_Blight",
+    "Potato__Healthy",
 ]
