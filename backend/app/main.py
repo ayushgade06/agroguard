@@ -126,5 +126,8 @@ app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])
 app.include_router(corn_router)
 app.include_router(wheat_router)
 
+from app.routes.prediction_history import router as prediction_history_router
+
 # 🔥 REGISTER AR ROUTE
 app.include_router(ar_router)
+app.include_router(prediction_history_router)

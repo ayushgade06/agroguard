@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Camera, X, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { Camera, X, AlertTriangle, CheckCircle, Info, Sparkles } from "lucide-react";
 import { analyzeARImage } from "../../services/diagnosisService";
 
 export default function ARView({ onStop }) {
@@ -116,6 +116,12 @@ export default function ARView({ onStop }) {
             className="absolute inset-0 w-full h-full object-cover"
           />
           <canvas ref={canvasRef} className="hidden" />
+
+          {/* Beta badge */}
+          <div className="absolute top-4 left-4 z-50 bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse">
+            <Sparkles size={10} />
+            BETA
+          </div>
 
           {/* Close button */}
           <button

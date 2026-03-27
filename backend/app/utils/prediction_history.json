@@ -1,0 +1,116 @@
+[
+    {
+        "crop": "wheat",
+        "disease": "Uncertain",
+        "confidence": 0.4104277491569519,
+        "timestamp": "2026-03-27T09:40:53.852355Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Uncertain",
+        "confidence": 0.41464442014694214,
+        "timestamp": "2026-03-27T09:41:11.935884Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Uncertain",
+        "confidence": 0.4173070192337036,
+        "timestamp": "2026-03-27T09:41:46.891855Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Uncertain",
+        "confidence": 0.41770240664482117,
+        "timestamp": "2026-03-27T09:42:01.456304Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Uncertain",
+        "confidence": 0.4104277491569519,
+        "timestamp": "2026-03-27T09:42:08.555606Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Uncertain",
+        "confidence": 0.39255112409591675,
+        "timestamp": "2026-03-27T09:56:22.196345Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Uncertain",
+        "confidence": 0.4043945372104645,
+        "timestamp": "2026-03-27T09:56:35.632184Z"
+    },
+    {
+        "crop": "general/rice",
+        "disease": "Healthy",
+        "confidence": 0.99660325050354,
+        "timestamp": "2026-03-27T09:57:06.108668Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Uncertain",
+        "confidence": 0.4043945372104645,
+        "timestamp": "2026-03-27T09:57:17.419901Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Leaf Blight",
+        "confidence": 0.9992857575416565,
+        "timestamp": "2026-03-27T10:01:49.880240Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Healthy",
+        "confidence": 0.9662861227989197,
+        "timestamp": "2026-03-27T10:02:01.491675Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Healthy",
+        "confidence": 0.9598449468612671,
+        "timestamp": "2026-03-27T10:02:09.628461Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Leaf Blight",
+        "confidence": 0.9996353387832642,
+        "timestamp": "2026-03-27T10:02:18.188003Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Leaf Blight",
+        "confidence": 0.5580520629882812,
+        "timestamp": "2026-03-27T10:03:53.754410Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Black Point",
+        "confidence": 0.9940377473831177,
+        "timestamp": "2026-03-27T10:04:52.060685Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Uncertain",
+        "confidence": 0.46112382411956787,
+        "timestamp": "2026-03-27T10:50:52.791603Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Uncertain",
+        "confidence": 0.45262113213539124,
+        "timestamp": "2026-03-27T10:51:57.741857Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Potato__Healthy",
+        "confidence": 0.4526211619377136,
+        "timestamp": "2026-03-27T10:52:51.661154Z"
+    },
+    {
+        "crop": "corn",
+        "disease": "Uncertain",
+        "confidence": 0.4370608627796173,
+        "timestamp": "2026-03-27T10:56:01.468286Z"
+    }
+]

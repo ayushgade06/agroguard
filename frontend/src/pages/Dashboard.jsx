@@ -217,7 +217,7 @@ export default function Dashboard() {
       icon: <ScanLine size={18} />,
       disabled: !locationReady,
     },
-    { key: "ar", label: "AR Scan", icon: <Camera size={18} /> },
+    { key: "ar", label: "AR Scan (Beta)", icon: <Camera size={18} /> },
     { key: "history", label: "History", icon: <History size={18} /> },
   ];
 
