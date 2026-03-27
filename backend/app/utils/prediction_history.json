@@ -112,5 +112,17 @@
         "disease": "Uncertain",
         "confidence": 0.4370608627796173,
         "timestamp": "2026-03-27T10:56:01.468286Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Potato__Healthy",
+        "confidence": 0.46112382411956787,
+        "timestamp": "2026-03-27T17:34:01.112603Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Potato__Healthy",
+        "confidence": 0.46112382411956787,
+        "timestamp": "2026-03-27T17:34:21.732325Z"
     }
 ]
