@@ -298,5 +298,59 @@
         "disease": "Late Blight",
         "confidence": 0.2858673632144928,
         "timestamp": "2026-03-28T06:27:53.464091Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Fusarium Foot Rot",
+        "confidence": 0.9995602965354919,
+        "timestamp": "2026-03-28T06:41:00.399859Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Black Point",
+        "confidence": 0.9994799494743347,
+        "timestamp": "2026-03-28T06:42:40.029456Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Leaf Blight",
+        "confidence": 0.9250122904777527,
+        "timestamp": "2026-03-28T06:42:54.699981Z"
+    },
+    {
+        "crop": "corn",
+        "disease": "Corn Rust",
+        "confidence": 0.5636957287788391,
+        "timestamp": "2026-03-28T06:43:15.971746Z"
+    },
+    {
+        "crop": "general/rice",
+        "disease": "LeafBlast",
+        "confidence": 0.6848852038383484,
+        "timestamp": "2026-03-28T06:43:37.256528Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Leaf Blight",
+        "confidence": 0.9999924898147583,
+        "timestamp": "2026-03-28T06:44:04.792694Z"
+    },
+    {
+        "crop": "corn",
+        "disease": "Corn Rust",
+        "confidence": 0.4585634768009186,
+        "timestamp": "2026-03-28T06:44:24.968530Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Black Point",
+        "confidence": 0.9994799494743347,
+        "timestamp": "2026-03-28T06:44:43.601340Z"
+    },
+    {
+        "crop": "general/rice",
+        "disease": "BrownSpot",
+        "confidence": 0.9997549653053284,
+        "timestamp": "2026-03-28T06:44:56.238264Z"
     }
 ]

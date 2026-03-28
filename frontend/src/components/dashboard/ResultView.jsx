@@ -161,42 +161,6 @@ export default function ResultView({ result, onDone }) {
           </p>
         </div>
 
-        {/* Environmental intelligence */}
-        {environmental_risk && (
-          <div className="rounded-3xl bg-linear-to-br from-emerald-600 to-emerald-800 p-7 text-white shadow-xl relative overflow-hidden">
-             {/* Decorative element */}
-             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-             
-             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="space-y-2">
-                   <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Hybrid Intelligence</p>
-                   <h3 className="text-2xl font-black">Environmental Overlay</h3>
-                   <div className="flex items-center gap-3 mt-1">
-                      <div className={`px-2 py-0.5 rounded text-[10px] font-black bg-white/20 uppercase`}>
-                        {environmental_risk.risk} Global Risk
-                      </div>
-                      <span className="text-xs opacity-70 font-bold uppercase tracking-widest">{location_info?.nearest_city || "Station-Sync"} Region</span>
-                   </div>
-                </div>
-
-                <div className="flex gap-4">
-                   <div className="px-4 py-3 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/10 text-center min-w-[100px]">
-                      <p className="text-[9px] font-black opacity-70 uppercase mb-1">Humidity</p>
-                      <p className="text-xl font-black">{environmental_risk.hum}%</p>
-                   </div>
-                   <div className="px-4 py-3 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/10 text-center min-w-[100px]">
-                      <p className="text-[9px] font-black opacity-70 uppercase mb-1">Temp</p>
-                      <p className="text-xl font-black">{environmental_risk.temp}°C</p>
-                   </div>
-                </div>
-             </div>
-
-             <div className="mt-6 pt-5 border-t border-white/10 text-sm font-medium opacity-90 leading-relaxed italic">
-                “{environmental_risk.disease} conditions detected in {location_info?.nearest_city}. Environmental factors currently favor disease development.”
-             </div>
-          </div>
-        )}
-
         {/* Explanation */}
         {explanation && (
           <div className="rounded-2xl bg-gradient-to-r from-slate-50 to-white border border-slate-100 p-6 shadow-inner">
