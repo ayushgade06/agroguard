@@ -67,7 +67,8 @@ def calculate_risk_from_metrics(temp, hum, pressure, wind_speed, wind_deg, visib
         "risk": risk,
         "confidence": round(prob, 2),
         "temp": temp,
-        "hum": hum
+        "hum": hum,
+        "pressure": pressure
     }
 
 def solve_weather_risk(data):
@@ -114,14 +115,14 @@ def solve_weather_risk(data):
 
 def predict_risk_for_city(city: str, api_key: str):
     params = {"q": city, "appid": api_key, "units": "metric"}
-    res = requests.get(OPENWEATHER_FORECAST_URL, params=params)
+    res = requests.get(OPENWEATHER_FORECAST_URL, params=params, timeout=5)
     res.raise_for_status()
     return solve_weather_risk(res.json())
 
 def predict_current_risk_for_city(city: str, api_key: str):
     """Calculates risk based on CURRENT weather (live)."""
     params = {"q": city, "appid": api_key, "units": "metric"}
-    res = requests.get(OPENWEATHER_CURRENT_URL, params=params)
+    res = requests.get(OPENWEATHER_CURRENT_URL, params=params, timeout=5)
     res.raise_for_status()
     data = res.json()
     

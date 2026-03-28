@@ -39,6 +39,7 @@ def get_detections(
         response.append(
             {
                 "id": det.id,
+                "crop": det.crop,
                 "disease": det.disease,
                 "confidence": det.confidence,
                 "latitude": det.latitude,

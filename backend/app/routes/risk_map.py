@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, File, UploadFile, Form
+from fastapi import APIRouter, Query, File, UploadFile, Form, Depends
 from typing import Optional
 import os
 import shutil
@@ -10,6 +10,13 @@ from app.ml.weather_risk.predictor import (
 )
 from app.ml.potato_disease.predictor import predict as predict_potato
 from PIL import Image
+from concurrent.futures import ThreadPoolExecutor
+from sqlalchemy.orm import Session
+from app.deps import get_db
+from app.routes.auth import get_current_user
+from app.models.user import User
+from app.models.detection import Detection
+from app.routes.detection import compute_severity
 
 router = APIRouter(prefix="/risk-map", tags=["Risk Map"])
 
@@ -29,17 +36,22 @@ def get_risk_map(
     """
     results = []
     
-    # Generate the 15-city statewide map (as seen in HybridPotato.ipynb)
-    for display_name, search_name in CITIES_CONFIG.items():
+    # Generate the 15-city statewide map using parallel requests
+    def fetch_city_risk(display_name, search_name):
         try:
-            # We add ",IN" to be more specific to India
             risk = predict_risk_for_city(f"{search_name},IN", api_key=DEFAULT_API_KEY)
-            # Override name back to display name if we queried by search_name
             risk["city"] = display_name
-            results.append(risk)
+            return risk
         except Exception as e:
             print(f"Error fetching risk for {display_name}: {e}")
-            continue
+            return None
+
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [executor.submit(fetch_city_risk, dn, sn) for dn, sn in CITIES_CONFIG.items()]
+        for future in futures:
+            risk = future.result()
+            if risk:
+                results.append(risk)
 
     user_point = None
     if lat is not None and lon is not None:
@@ -59,7 +71,9 @@ def get_risk_map(
 async def get_hybrid_diagnosis(
     lat: float = Form(...),
     lon: float = Form(...),
-    image: Optional[UploadFile] = File(None)
+    image: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Combines environmental risk (weather) with visual diagnosis (image) 
@@ -93,6 +107,22 @@ async def get_hybrid_diagnosis(
             # Clean up
             if os.path.exists(file_path):
                 os.remove(file_path)
+
+        # Log to User History (if image provided)
+        if visual_diagnosis:
+            severity = compute_severity(visual_diagnosis["confidence"])
+            detection = Detection(
+                user_id=current_user.id,
+                crop="potato", # Hybrid is currently potato-only
+                disease=visual_diagnosis["disease"],
+                confidence=visual_diagnosis["confidence"],
+                severity=severity,
+                latitude=lat,
+                longitude=lon,
+            )
+            db.add(detection)
+            db.commit()
+            db.refresh(detection)
 
     # 3. Hybrid Logic
     # Returns a consolidated report of both data sources.

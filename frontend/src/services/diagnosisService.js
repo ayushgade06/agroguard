@@ -15,15 +15,9 @@ export async function analyzeCropImage(
 
   let endpoint = "http://127.0.0.1:8000/detections/";
   
-  if (crop === "corn") {
-    endpoint = "http://127.0.0.1:8000/ml/corn-disease";
-  } else if (crop === "wheat") {
-    endpoint = "http://127.0.0.1:8000/predict/wheat";
-  } else {
-    formData.append("crop", crop || "rice");
-    formData.append("latitude", latitude.toString());
-    formData.append("longitude", longitude.toString());
-  }
+  formData.append("crop", crop || "rice");
+  formData.append("latitude", (latitude || 0).toString());
+  formData.append("longitude", (longitude || 0).toString());
 
   const res = await fetch(endpoint, {
     method: "POST",
@@ -39,44 +33,6 @@ export async function analyzeCropImage(
   }
 
   const data = await res.json();
-
-  if (crop === "corn") {
-    return {
-      disease: data.display_name || data.class || "Unknown",
-      confidence: data.confidence || 0,
-      explanation: `The model detected ${data.display_name || data.class || "a condition"} with ${(
-        (data.confidence || 0) * 100
-      ).toFixed(2)}% confidence.`,
-      immediateActions: [
-        "Isolate affected crops",
-        "Avoid overhead irrigation",
-        "Consult local agriculture officer",
-      ],
-    };
-  }
-
-  if (crop === "wheat") {
-    const isHealthy = (data.disease || "").toLowerCase().includes("healthy");
-    return {
-      disease: data.disease || "Unknown",
-      confidence: data.confidence || 0,
-      explanation: isHealthy
-        ? `Your wheat crop appears healthy with ${((data.confidence || 0) * 100).toFixed(2)}% confidence. Continue regular monitoring.`
-        : `The model detected ${data.disease || "a condition"} in your wheat crop with ${((data.confidence || 0) * 100).toFixed(2)}% confidence.`,
-      immediateActions: isHealthy
-        ? [
-            "Continue regular field monitoring",
-            "Maintain optimal irrigation schedule",
-            "Document field conditions for tracking",
-          ]
-        : [
-            "Isolate affected wheat plants to prevent spread",
-            "Avoid overhead irrigation on infected areas",
-            "Apply recommended fungicide or treatment",
-            "Consult a local agriculture officer or extension service",
-          ],
-    };
-  }
 
   return data;
 }

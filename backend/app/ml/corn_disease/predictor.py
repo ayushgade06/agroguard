@@ -35,7 +35,7 @@ def predict_corn_disease(image):
     formatted_label = format_label(raw_label)
 
     # Add confidence threshold
-    if confidence < 0.5:
+    if confidence < 0.3:
         raw_label = "Uncertain"
         formatted_label = "Uncertain"
 

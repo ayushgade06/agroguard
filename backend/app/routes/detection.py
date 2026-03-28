@@ -12,6 +12,8 @@ from app.utils.distance import haversine
 # ✅ REAL ML IMPORTS
 from app.ml.image_classifier.predictor import predict_image
 from app.ml.potato_disease.predictor import predict as predict_potato
+from app.ml.corn_disease.predictor import predict_corn_disease
+from app.ml.wheat_disease.predictor import predict_wheat
 
 router = APIRouter(prefix="/detections", tags=["Detections"])
 
@@ -58,7 +60,16 @@ async def detect_disease(
         result = predict_potato(image)
         disease = result.get("disease", "Unknown")
         confidence = float(result.get("confidence", 0.0))
+    elif crop_normalized == "corn":
+        result = predict_corn_disease(image)
+        disease = result.get("display_name", "Unknown")
+        confidence = float(result.get("confidence", 0.0))
+    elif crop_normalized == "wheat":
+        result = predict_wheat(image)
+        disease = result.get("disease", "Unknown")
+        confidence = float(result.get("confidence", 0.0))
     else:
+        # Default to rice (general classifier)
         result = predict_image(image)
         disease = result.get("class", "Unknown")
         confidence = float(result.get("confidence", 0.0))
@@ -111,7 +122,7 @@ async def detect_disease(
                 message=f"{disease} detected near your location",
                 data={
                     "disease": disease,
-                    "crop": "potato" if crop_normalized == "potato" else "rice",
+                    "crop": crop_normalized,
                     "distance_km": round(distance, 2),
                     "farmer": current_user.name or "A nearby farmer",
                 },
@@ -121,17 +132,31 @@ async def detect_disease(
     db.commit()
 
     # ---------- RESPONSE ----------
+    is_healthy = "healthy" in (disease or "").lower()
+    
+    if is_healthy:
+        explanation = f"Your {crop_normalized} crop appears healthy with {confidence:.2%} confidence. Continue regular monitoring."
+        actions = [
+            "Continue regular field monitoring",
+            "Maintain optimal irrigation schedule",
+            "Document field conditions for tracking",
+        ]
+    else:
+        explanation = f"The model detected {disease} in your {crop_normalized} crop with {confidence:.2%} confidence."
+        actions = [
+            "Isolate affected crops to prevent spread",
+            "Avoid overhead irrigation on infected areas",
+            "Apply recommended fungicide or treatment",
+            "Consult a local agriculture officer or extension service",
+        ]
+
     return {
         "disease": disease,
         "confidence": confidence,
         "severity": severity,
-        "crop": "potato" if crop_normalized == "potato" else "rice",
-        "explanation": f"The model detected {disease} with {confidence:.2%} confidence.",
-        "immediateActions": [
-            "Isolate affected crops",
-            "Avoid overhead irrigation",
-            "Consult local agriculture officer",
-        ],
+        "crop": crop_normalized,
+        "explanation": explanation,
+        "immediateActions": actions,
     }
 
 
