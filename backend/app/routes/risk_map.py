@@ -9,6 +9,9 @@ from app.ml.weather_risk.predictor import (
     CITIES_CONFIG
 )
 from app.ml.potato_disease.predictor import predict as predict_potato
+from app.ml.image_classifier.predictor import predict_image
+from app.ml.corn_disease.predictor import predict_corn_disease
+from app.ml.wheat_disease.predictor import predict_wheat
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy.orm import Session
@@ -71,6 +74,7 @@ def get_risk_map(
 async def get_hybrid_diagnosis(
     lat: float = Form(...),
     lon: float = Form(...),
+    crop: str = Form("potato"),
     image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -95,13 +99,30 @@ async def get_hybrid_diagnosis(
             shutil.copyfileobj(image.file, buffer)
             
         try:
-            # Run vision model
+            # Run vision model based on crop
             with Image.open(file_path).convert("RGB") as img:
-                vision_result = predict_potato(img)
+                crop_normalized = crop.strip().lower()
                 
+                if crop_normalized == "potato":
+                    res = predict_potato(img)
+                    disease = res.get("disease", "Unknown")
+                    confidence = float(res.get("confidence", 0.0))
+                elif crop_normalized == "corn":
+                    res = predict_corn_disease(img)
+                    disease = res.get("display_name", "Unknown")
+                    confidence = float(res.get("confidence", 0.0))
+                elif crop_normalized == "wheat":
+                    res = predict_wheat(img)
+                    disease = res.get("disease", "Unknown")
+                    confidence = float(res.get("confidence", 0.0))
+                else: # Default to rice / general classifier
+                    res = predict_image(img)
+                    disease = res.get("class", "Unknown")
+                    confidence = float(res.get("confidence", 0.0))
+                    
             visual_diagnosis = {
-                "disease": vision_result.get("disease"),
-                "confidence": vision_result.get("confidence"),
+                "disease": disease,
+                "confidence": confidence,
             }
         finally:
             # Clean up
@@ -113,7 +134,7 @@ async def get_hybrid_diagnosis(
             severity = compute_severity(visual_diagnosis["confidence"])
             detection = Detection(
                 user_id=current_user.id,
-                crop="potato", # Hybrid is currently potato-only
+                crop=crop, 
                 disease=visual_diagnosis["disease"],
                 confidence=visual_diagnosis["confidence"],
                 severity=severity,

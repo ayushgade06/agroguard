@@ -220,5 +220,23 @@
         "disease": "Potato__Healthy",
         "confidence": 0.4595787823200226,
         "timestamp": "2026-03-28T03:55:16.495691Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Leaf Blight",
+        "confidence": 0.5854892134666443,
+        "timestamp": "2026-03-28T04:17:44.249551Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Potato__Healthy",
+        "confidence": 0.4595787823200226,
+        "timestamp": "2026-03-28T04:18:53.218229Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Potato__Healthy",
+        "confidence": 0.46376433968544006,
+        "timestamp": "2026-03-28T04:20:02.645221Z"
     }
 ]

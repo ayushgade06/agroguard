@@ -301,7 +301,7 @@ export default function Dashboard() {
 
             {view === "map" && (
               <div className="h-full">
-                <MapView location={location} />
+                <MapView location={location} crop={crop} setCrop={setCrop} />
               </div>
             )}
 
