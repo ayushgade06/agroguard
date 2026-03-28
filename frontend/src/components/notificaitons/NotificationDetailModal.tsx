@@ -58,11 +58,8 @@ export default function NotificationDetailModal({
           {/* Header Banner */}
           <div className={`px-7 py-6 bg-gradient-to-r ${headerColor} text-white flex justify-between items-start`}>
             <div className="pr-8">
-              <span className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-[10px] uppercase font-bold tracking-widest mb-3 backdrop-blur-sm shadow-sm">
-                {alertBadge}
-              </span>
               <h2 className="text-2xl font-black leading-tight tracking-tight shadow-sm drop-shadow-sm">
-                {notification.title}
+                {alertBadge}
               </h2>
             </div>
             <button
