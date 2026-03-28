@@ -274,5 +274,11 @@
         "disease": "Healthy",
         "confidence": 0.46376433968544006,
         "timestamp": "2026-03-28T04:34:07.627402Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Late Blight",
+        "confidence": 0.2858673632144928,
+        "timestamp": "2026-03-28T04:36:56.916428Z"
     }
 ]

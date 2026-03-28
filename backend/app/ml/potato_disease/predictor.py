@@ -45,8 +45,19 @@ def predict(image: Image.Image):
 
     disease = CLASS_NAMES[idx].replace("Potato__", "").replace("_", " ")
 
+    # --- BIAS CORRECTION & SENSITIVITY BOOST ---
+    # If the model is leaning towards "Healthy" but not with high certainty,
+    # and "Late Blight" is a strong contender (Top 2), we prioritize Late Blight.
+    if disease == "Healthy" and confidence < 0.7:
+        top_2_indices = np.argsort(probs)[-2:]
+        if 0 in top_2_indices: # 0 is Late Blight
+            disease = "Late Blight"
+            confidence = float(probs[0])
+            if DEBUG_ML:
+                print(">>> SENSITIVITY BOOST: Overriding 'Healthy' with 'Late Blight'")
+
     # Add confidence threshold
-    if confidence < 0.3:
+    if confidence < 0.2:
         disease = "Uncertain"
 
     if DEBUG_ML:

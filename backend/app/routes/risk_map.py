@@ -40,7 +40,8 @@ def get_risk_map(
     # Generate the 15-city statewide map using parallel requests
     def fetch_city_risk(display_name, search_name):
         try:
-            risk = predict_risk_for_city(f"{search_name},IN", api_key=DEFAULT_API_KEY, crop=crop)
+            # Overriding to potato for Risk Map specifically
+            risk = predict_city_risk(f"{search_name},IN", api_key=DEFAULT_API_KEY, crop="potato")
             risk["city"] = display_name
             return risk
         except Exception as e:
@@ -57,7 +58,8 @@ def get_risk_map(
     user_point = None
     if lat is not None and lon is not None:
         try:
-            user_point = predict_risk_by_coords(lat, lon, api_key=DEFAULT_API_KEY, crop=crop)
+            # Overriding to potato for Risk Map specifically
+            user_point = predict_risk_by_coords(lat, lon, api_key=DEFAULT_API_KEY, crop="potato")
             user_point["type"] = "user_farm"
         except Exception as e:
             print(f"Error fetching user location risk: {e}")
