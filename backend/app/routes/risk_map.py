@@ -19,12 +19,10 @@ from app.deps import get_db
 from app.routes.auth import get_current_user
 from app.models.user import User
 from app.models.detection import Detection
-from app.routes.detection import compute_severity
+from app.utils.history_logger import compute_severity, save_prediction
+from app.utils.constants import DEFAULT_API_KEY
 
 router = APIRouter(prefix="/risk-map", tags=["Risk Map"])
-
-# Standardize this or move to .env
-DEFAULT_API_KEY = "fd3e4a7873ba30c646f32933bbc03e89"
 
 @router.get("")
 def get_risk_map(
@@ -42,7 +40,7 @@ def get_risk_map(
     # Generate the 15-city statewide map using parallel requests
     def fetch_city_risk(display_name, search_name):
         try:
-            risk = predict_risk_for_city(f"{search_name},IN", api_key=DEFAULT_API_KEY)
+            risk = predict_risk_for_city(f"{search_name},IN", api_key=DEFAULT_API_KEY, crop=crop)
             risk["city"] = display_name
             return risk
         except Exception as e:
@@ -59,7 +57,7 @@ def get_risk_map(
     user_point = None
     if lat is not None and lon is not None:
         try:
-            user_point = predict_risk_by_coords(lat, lon, api_key=DEFAULT_API_KEY)
+            user_point = predict_risk_by_coords(lat, lon, api_key=DEFAULT_API_KEY, crop=crop)
             user_point["type"] = "user_farm"
         except Exception as e:
             print(f"Error fetching user location risk: {e}")
@@ -85,7 +83,7 @@ async def get_hybrid_diagnosis(
     Uses 'current_only=True' for live weather-based risk.
     """
     # 1. Environmental Analysis (LIVE)
-    weather_risk = predict_risk_by_coords(lat, lon, api_key=DEFAULT_API_KEY, current_only=True)
+    weather_risk = predict_risk_by_coords(lat, lon, api_key=DEFAULT_API_KEY, current_only=True, crop=crop)
     
     visual_diagnosis = None
     # 2. Visual Diagnosis (if image provided)

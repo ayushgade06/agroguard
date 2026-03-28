@@ -238,5 +238,41 @@
         "disease": "Potato__Healthy",
         "confidence": 0.46376433968544006,
         "timestamp": "2026-03-28T04:20:02.645221Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Potato__Healthy",
+        "confidence": 0.46376433968544006,
+        "timestamp": "2026-03-28T04:23:40.751150Z"
+    },
+    {
+        "crop": "corn",
+        "disease": "Corn Rust",
+        "confidence": 0.5636957287788391,
+        "timestamp": "2026-03-28T04:24:00.596051Z"
+    },
+    {
+        "crop": "corn",
+        "disease": "Corn Rust",
+        "confidence": 0.5636957287788391,
+        "timestamp": "2026-03-28T04:27:00.020037Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Black Point",
+        "confidence": 0.9994799494743347,
+        "timestamp": "2026-03-28T04:27:48.675506Z"
+    },
+    {
+        "crop": "wheat",
+        "disease": "Black Point",
+        "confidence": 0.9994799494743347,
+        "timestamp": "2026-03-28T04:30:13.050509Z"
+    },
+    {
+        "crop": "potato",
+        "disease": "Healthy",
+        "confidence": 0.46376433968544006,
+        "timestamp": "2026-03-28T04:34:07.627402Z"
     }
 ]

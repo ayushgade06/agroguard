@@ -67,7 +67,7 @@ export default function MapView({ location, crop = "potato", setCrop }) {
       try {
         setLoading(true);
         setError("");
-        let query = `${API_BASE}/risk-map?crop=${crop}`;
+        let query = `${API_BASE}/risk-map?crop=potato`;
         if (location?.latitude && location?.longitude) {
           query += `&lat=${location.latitude}&lon=${location.longitude}`;
         }
@@ -100,7 +100,7 @@ export default function MapView({ location, crop = "potato", setCrop }) {
         const formData = new FormData();
         formData.append("lat", loc.latitude);
         formData.append("lon", loc.longitude);
-        formData.append("crop", crop);
+        formData.append("crop", "potato");
         const token = localStorage.getItem("token");
         const res = await fetch(`${API_BASE}/risk-map/hybrid-diagnosis`, {
             method: "POST",
@@ -141,7 +141,7 @@ export default function MapView({ location, crop = "potato", setCrop }) {
       const formData = new FormData();
       formData.append("lat", location.latitude);
       formData.append("lon", location.longitude);
-      formData.append("crop", crop);
+      formData.append("crop", "potato");
       if (hybridFile) {
         formData.append("image", hybridFile);
       }
@@ -268,7 +268,6 @@ export default function MapView({ location, crop = "potato", setCrop }) {
 
         {/* Floating UI Elements (Ensured Z-Index) */}
         
-        {/* Quick Actions Header Overlay */}
         <div className="absolute top-6 left-6 z-1000 flex items-center gap-3">
             <button 
                 onClick={() => {
@@ -280,19 +279,6 @@ export default function MapView({ location, crop = "potato", setCrop }) {
                 <Camera size={14} className="text-emerald-400" /> 
                 New Hybrid Check
             </button>
-
-            {/* Crop Selector */}
-            <div className="flex bg-white/90 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-white/50">
-                {["rice", "potato", "corn", "wheat"].map((c) => (
-                    <button
-                        key={c}
-                        onClick={() => setCrop(c)}
-                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${crop === c ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
-                    >
-                        {c}
-                    </button>
-                ))}
-            </div>
         </div>
 
         {/* Farm Stats Summary Card (Always Visible if ready) */}
@@ -372,7 +358,7 @@ export default function MapView({ location, crop = "potato", setCrop }) {
                         <Camera size={24} />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-1">{crop.toUpperCase()} Scan</h3>
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-1">POTATO Scan</h3>
                         <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Hybrid Vision + Weather Analytics</p>
                     </div>
                 </div>

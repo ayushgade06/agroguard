@@ -62,3 +62,11 @@ def check_bias(crop: str, limit: int = 20, threshold: float = 0.8):
         if ratio >= threshold:
             print(f"⚠️ WARNING: Model bias detected for {crop}! Class '{d}' appears {ratio*100:.0f}% of the time in the last {len(crop_history)} predictions.")
 
+def compute_severity(confidence: float) -> str:
+    """Standard severity mapping based on model confidence."""
+    if confidence >= 0.8:
+        return "High"
+    if confidence >= 0.5:
+        return "Medium"
+    return "Low"
+

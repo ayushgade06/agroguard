@@ -43,7 +43,7 @@ def predict(image: Image.Image):
         top_2 = np.argsort(probs)[-2:][::-1]
         print("Top 2 Predictions:", {CLASS_NAMES[i]: float(probs[i]) for i in top_2})
 
-    disease = CLASS_NAMES[idx]
+    disease = CLASS_NAMES[idx].replace("Potato__", "").replace("_", " ")
 
     # Add confidence threshold
     if confidence < 0.3:

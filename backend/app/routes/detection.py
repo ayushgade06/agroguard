@@ -9,23 +9,17 @@ from app.models.detection import Detection
 from app.models.notification import Notification
 from app.utils.distance import haversine
 
-# ✅ REAL ML IMPORTS
 from app.ml.image_classifier.predictor import predict_image
 from app.ml.potato_disease.predictor import predict as predict_potato
 from app.ml.corn_disease.predictor import predict_corn_disease
 from app.ml.wheat_disease.predictor import predict_wheat
+from app.ml.weather_risk.predictor import predict_risk_by_coords
+from app.utils.history_logger import compute_severity
+from app.utils.constants import DEFAULT_API_KEY
 
 router = APIRouter(prefix="/detections", tags=["Detections"])
 
 RADIUS_KM = 15
-
-
-def compute_severity(confidence: float) -> str:
-    if confidence >= 0.8:
-        return "High"
-    if confidence >= 0.5:
-        return "Medium"
-    return "Low"
 
 
 @router.post("/")
@@ -131,6 +125,19 @@ async def detect_disease(
 
     db.commit()
 
+    # ---------- ENVIRONMENTAL ANALYSIS (HYBRID) ----------
+    environmental_risk = None
+    location_info = None
+    try:
+        weather_res = predict_risk_by_coords(latitude, longitude, api_key=DEFAULT_API_KEY, current_only=True, crop=crop_normalized)
+        environmental_risk = weather_res.get("summary")
+        location_info = {
+            "nearest_city": weather_res.get("nearest_station"),
+            "distance_km": weather_res.get("distance_km")
+        }
+    except Exception as e:
+        print(f"Environmental risk fetch failed: {e}")
+
     # ---------- RESPONSE ----------
     is_healthy = "healthy" in (disease or "").lower()
     
@@ -157,6 +164,8 @@ async def detect_disease(
         "crop": crop_normalized,
         "explanation": explanation,
         "immediateActions": actions,
+        "environmental_risk": environmental_risk,
+        "location_info": location_info
     }
 
 

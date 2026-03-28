@@ -4,6 +4,13 @@ import pandas as pd
 from .model_loader import model, scaler
 from .disease_labels import DISEASE_MAP
 
+CROP_DISEASE_MAPPING = {
+    "potato": {0: "Late Blight", 1: "Early Blight"},
+    "rice": {0: "Rice Blast Risk", 1: "Sheath Blight Risk"},
+    "corn": {0: "Corn Rust Risk", 1: "Gray Leaf Spot Risk"},
+    "wheat": {0: "Wheat Rust Risk", 1: "Powdery Mildew Risk"},
+}
+
 OPENWEATHER_FORECAST_URL = "http://api.openweathermap.org/data/2.5/forecast"
 OPENWEATHER_CURRENT_URL = "http://api.openweathermap.org/data/2.5/weather"
 
@@ -32,7 +39,7 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
     return R * (2 * math.atan2(math.sqrt(a), math.sqrt(1 - a)))
 
-def calculate_risk_from_metrics(temp, hum, pressure, wind_speed, wind_deg, visibility):
+def calculate_risk_from_metrics(temp, hum, pressure, wind_speed, wind_deg, visibility, crop="potato"):
     """Core ML logic to calculate risk from raw weather features."""
     interaction = temp * hum
     df = pd.DataFrame([{
@@ -49,7 +56,10 @@ def calculate_risk_from_metrics(temp, hum, pressure, wind_speed, wind_deg, visib
     pred = model.predict(X)[0]
     prob = model.predict_proba(X).max()
 
-    disease = DISEASE_MAP[pred]
+    # Map disease based on crop type
+    crop_lower = (crop or "potato").lower()
+    mapping = CROP_DISEASE_MAPPING.get(crop_lower, CROP_DISEASE_MAPPING["potato"])
+    disease = mapping.get(pred, DISEASE_MAP[pred])
 
     if prob >= 0.85:
         risk = "High"
@@ -71,7 +81,7 @@ def calculate_risk_from_metrics(temp, hum, pressure, wind_speed, wind_deg, visib
         "pressure": pressure
     }
 
-def solve_weather_risk(data):
+def solve_weather_risk(data, crop="potato"):
     """Calculates risk from OpenWeather forecast data (5-day)."""
     worst_case = {
         "severity_score": -1,
@@ -91,7 +101,8 @@ def solve_weather_risk(data):
             pressure=entry["main"]["pressure"],
             wind_speed=entry["wind"].get("speed", 0),
             wind_deg=entry["wind"].get("deg", 0),
-            visibility=entry.get("visibility", 10000) / 1000
+            visibility=entry.get("visibility", 10000) / 1000,
+            crop=crop
         )
 
         if metrics["severity_score"] > worst_case["severity_score"]:
@@ -110,16 +121,17 @@ def solve_weather_risk(data):
         "city": data["city"]["name"],
         "coordinates": data["city"]["coord"],
         "summary": worst_case,
-        "forecast": daily
+        "forecast": daily,
+        "crop": crop
     }
 
-def predict_risk_for_city(city: str, api_key: str):
+def predict_risk_for_city(city: str, api_key: str, crop="potato"):
     params = {"q": city, "appid": api_key, "units": "metric"}
     res = requests.get(OPENWEATHER_FORECAST_URL, params=params, timeout=5)
     res.raise_for_status()
-    return solve_weather_risk(res.json())
+    return solve_weather_risk(res.json(), crop=crop)
 
-def predict_current_risk_for_city(city: str, api_key: str):
+def predict_current_risk_for_city(city: str, api_key: str, crop="potato"):
     """Calculates risk based on CURRENT weather (live)."""
     params = {"q": city, "appid": api_key, "units": "metric"}
     res = requests.get(OPENWEATHER_CURRENT_URL, params=params, timeout=5)
@@ -132,24 +144,26 @@ def predict_current_risk_for_city(city: str, api_key: str):
         pressure=data["main"]["pressure"],
         wind_speed=data["wind"].get("speed", 0),
         wind_deg=data["wind"].get("deg", 0),
-        visibility=data.get("visibility", 10000) / 1000
+        visibility=data.get("visibility", 10000) / 1000,
+        crop=crop
     )
     
     return {
         "city": data["name"],
         "coordinates": data["coord"],
-        "summary": metrics
+        "summary": metrics,
+        "crop": crop
     }
 
-def predict_risk_by_coords(lat: float, lon: float, api_key: str, current_only: bool = False):
+def predict_risk_by_coords(lat: float, lon: float, api_key: str, current_only: bool = False, crop="potato"):
     """Finds nearest station and predicts risk."""
     closest_city_name = min(CITY_COORDS.keys(), key=lambda city: haversine_distance(lat, lon, CITY_COORDS[city][0], CITY_COORDS[city][1]))
     search_name = CITIES_CONFIG.get(closest_city_name, closest_city_name)
     
     if current_only:
-        result = predict_current_risk_for_city(f"{search_name},IN", api_key)
+        result = predict_current_risk_for_city(f"{search_name},IN", api_key, crop=crop)
     else:
-        result = predict_risk_for_city(f"{search_name},IN", api_key)
+        result = predict_risk_for_city(f"{search_name},IN", api_key, crop=crop)
     
     dist = haversine_distance(lat, lon, CITY_COORDS[closest_city_name][0], CITY_COORDS[closest_city_name][1])
     result["nearest_station"] = closest_city_name
