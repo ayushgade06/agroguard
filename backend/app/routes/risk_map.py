@@ -41,7 +41,7 @@ def get_risk_map(
     def fetch_city_risk(display_name, search_name):
         try:
             # Overriding to potato for Risk Map specifically
-            risk = predict_city_risk(f"{search_name},IN", api_key=DEFAULT_API_KEY, crop="potato")
+            risk = predict_risk_for_city(f"{search_name},IN", api_key=DEFAULT_API_KEY, crop="potato")
             risk["city"] = display_name
             return risk
         except Exception as e:
